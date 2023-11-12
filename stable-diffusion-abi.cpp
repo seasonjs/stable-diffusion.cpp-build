@@ -1,6 +1,7 @@
 #include "stable-diffusion-abi.h"
 
 #include <string>
+#include <cstring>
 #include <map>
 /*================================================= StableDiffusion C API  =============================================*/
 
@@ -232,6 +233,6 @@ const char* get_stable_diffusion_system_info() {
     std::string info = sd_get_system_info();
     size_t length = info.size() + 1;
     char* buffer = new char[length];
-    memcpy(buffer, info.c_str(), length);
+    std::memcpy(buffer, info.c_str(), length);
     return buffer;
 };
