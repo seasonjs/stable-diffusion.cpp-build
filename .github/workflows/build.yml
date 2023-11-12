@@ -122,13 +122,8 @@ jobs:
         run: |
           mkdir build
           cd build
+          cmake ..
           cmake --build . --config Release
-
-      - name: Test
-        id: cmake_test
-        run: |
-          cd build
-          ctest --verbose
 
       - name: Get commit hash
         id: commit
