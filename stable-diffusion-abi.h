@@ -5,8 +5,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "stable-diffusion.h"
-
 #ifdef STABLE_DIFFUSION_SHARED
 #if defined(_WIN32) && !defined(__MINGW32__)
 #ifdef STABLE_DIFFUSION_BUILD
@@ -72,9 +70,11 @@ extern "C"
 	STABLE_DIFFUSION_API void set_img2img_seed(sd_img2img_options* opt, int64_t seed);
 	//================================================================================
 
-	STABLE_DIFFUSION_API void* create_stable_diffusion(int n_threads,
+	STABLE_DIFFUSION_API void* create_stable_diffusion(
+		int n_threads,
 		bool vae_decode_only,
 		bool free_params_immediately,
+		const char* lora_model_dir,
 		const char* rng_type);
 
 	STABLE_DIFFUSION_API void destroy_stable_diffusion(void* sd);

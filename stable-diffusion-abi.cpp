@@ -1,5 +1,6 @@
 #include "stable-diffusion-abi.h"
 
+#include "stable-diffusion.h"
 #include <string>
 #include <cstring>
 #include <map>
@@ -149,13 +150,13 @@ void set_img2img_seed(sd_img2img_options* opt, int64_t seed) {
 	opt->seed = seed;
 }
 
-void* create_stable_diffusion(int n_threads, bool vae_decode_only, bool free_params_immediately, const char* rng_type) {
+void* create_stable_diffusion(int n_threads, bool vae_decode_only, bool free_params_immediately,const char* lora_model_dir, const char* rng_type) {
 	auto s = std::string(rng_type);
 	auto it = RNGTypeMap.find(s);
 	if (it != RNGTypeMap.end()) {
-		return new StableDiffusion(n_threads, vae_decode_only, free_params_immediately, it->second);
+		return new StableDiffusion(n_threads, vae_decode_only, free_params_immediately,std::string(lora_model_dir), it->second);
 	}
-	return NULL;
+	return nullptr;
 };
 
 void destroy_stable_diffusion(void* sd) {
@@ -192,7 +193,7 @@ uint8_t* txt2img(void* sd, sd_txt2img_options* opt, int64_t* output_size) {
 		delete opt;
 		return result.data();
 	}
-	return NULL;
+	return nullptr;
 };
 
 uint8_t* img2img(void* sd, sd_img2img_options* opt, int64_t* output_size) {
@@ -218,7 +219,7 @@ uint8_t* img2img(void* sd, sd_img2img_options* opt, int64_t* output_size) {
 		delete opt;
 		return result.data();
 	}
-	return NULL;
+	return nullptr;
 };
 
 void set_stable_diffusion_log_level(const char* level) {
