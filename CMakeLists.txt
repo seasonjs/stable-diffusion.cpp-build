@@ -101,7 +101,10 @@ if (APPLE AND NOT GGML_NO_ACCELERATE)
 endif()
 
 set(SD_ABI sd-abi)
-add_library(${SD_ABI} SHARED stable-diffusion-abi.cpp stable-diffusion-abi.h)
+add_library(${SD_ABI} SHARED
+        stable-diffusion-abi.cpp
+        stable-diffusion-abi.h
+        base64.hpp)
 set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
 target_link_libraries(${SD_ABI} PUBLIC $<TARGET_OBJECTS:ggml> $<TARGET_OBJECTS:stable-diffusion> ${SD_EXTRA_LIBS} ${CMAKE_THREAD_LIBS_INIT})
