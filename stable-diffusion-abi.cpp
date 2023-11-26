@@ -207,7 +207,7 @@ bool load_from_file(void* sd, const char* file_path, const char* schedule)
     return false;
 };
 
-uint8_t* txt2img(void* sd, const sd_txt2img_options* opt, int64_t* output_size)
+const char* txt2img(void* sd, const sd_txt2img_options* opt)
 {
     const auto sm = std::string(opt->sample_method);
     const auto it = SampleMethodMap.find(sm);
@@ -224,16 +224,16 @@ uint8_t* txt2img(void* sd, const sd_txt2img_options* opt, int64_t* output_size)
                                             /* int sample_steps */ opt->sample_steps,
                                             /* int64_t seed */ opt->seed
         );
-        *output_size = static_cast<int64_t>(result.size());
-        const auto buffer = new uint8_t[result.size()];
-        std::memcpy(buffer, result.data(), result.size());
+        const auto str=code::base64_encode<std::string,std::vector<uint8_t>>(result,false);
+        const auto buffer = new char[str.size()];
+        std::memcpy(buffer, str.c_str(), str.size());
         return buffer;
     }
     delete opt;
     return nullptr;
 };
 
-uint8_t* img2img(void* sd, const sd_img2img_options* opt, int64_t* output_size)
+const char* img2img(void* sd, const sd_img2img_options* opt)
 {
     const auto sm = std::string(opt->sample_method);
     const auto it = SampleMethodMap.find(sm);
@@ -253,10 +253,11 @@ uint8_t* img2img(void* sd, const sd_img2img_options* opt, int64_t* output_size)
                                                        /* float strength */ opt->strength,
                                                        /* int64_t seed */ opt->seed
         );
-        *output_size = static_cast<int64_t>(result.size());
-        const auto buffer = new uint8_t[result.size()];
-        std::memcpy(buffer, result.data(), result.size());
+        const auto str=code::base64_encode<std::string,std::vector<uint8_t>>(result,false);
+        const auto buffer = new char[str.size()];
+        std::memcpy(buffer, str.c_str(), str.size());
         return buffer;
+
     }
     delete opt;
     return nullptr;
@@ -276,12 +277,12 @@ const char* get_stable_diffusion_system_info()
 {
     const std::string info = sd_get_system_info();
     const size_t length = info.size() + 1;
-    char* buffer = new char[length];
+    const auto buffer = new char[length];
     std::memcpy(buffer, info.c_str(), length);
     return buffer;
 };
 
-void free_buffer(const uint8_t* buffer)
+void free_buffer(const char* buffer)
 {
     delete [] buffer;
 }
