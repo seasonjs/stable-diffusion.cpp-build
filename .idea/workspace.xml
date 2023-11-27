@@ -25,10 +25,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,6 +37,7 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/vector" root0="FORCE_HIGHLIGHTING" />
@@ -136,7 +134,7 @@
       <option name="presentableId" value="Default" />
       <updated>1701087466926</updated>
       <workItem from="1701087467975" duration="6974000" />
-      <workItem from="1701098984149" duration="1593000" />
+      <workItem from="1701098984149" duration="1914000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -170,7 +168,23 @@
       <option name="project" value="LOCAL" />
       <updated>1701099311027</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="test for cuda build on windows">
+      <option name="closed" value="true" />
+      <created>1701100799184</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1701100799184</updated>
+    </task>
+    <task id="LOCAL-00006" summary="test for cuda build on windows">
+      <option name="closed" value="true" />
+      <created>1701100883802</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1701100883802</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -187,6 +201,7 @@
     <MESSAGE value="fix build fail on ubuntu" />
     <MESSAGE value="add" />
     <MESSAGE value="add set_txt2img_batch_count api" />
-    <option name="LAST_COMMIT_MESSAGE" value="add set_txt2img_batch_count api" />
+    <MESSAGE value="test for cuda build on windows" />
+    <option name="LAST_COMMIT_MESSAGE" value="test for cuda build on windows" />
   </component>
 </project>
