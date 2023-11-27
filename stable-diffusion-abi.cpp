@@ -107,6 +107,10 @@ void set_txt2img_seed(sd_txt2img_options* opt, const int64_t seed) {
     opt->seed = seed;
 }
 
+void set_txt2img_batch_count(sd_txt2img_options* opt, int batch_count) {
+    opt->batch_count = batch_count;
+}
+
 void set_img2img_init_img(sd_img2img_options* opt, const char* init_img) {
     const auto init_image = code::base64_decode<std::vector<uint8_t>, std::string>(init_img);
     opt->init_img = new uint8_t[init_image.size()];

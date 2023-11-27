@@ -45,6 +45,8 @@ STABLE_DIFFUSION_API void set_txt2img_sample_steps(sd_txt2img_options* opt, int 
 
 STABLE_DIFFUSION_API void set_txt2img_seed(sd_txt2img_options* opt, int64_t seed);
 
+STABLE_DIFFUSION_API void set_txt2img_batch_count(sd_txt2img_options* opt, int batch_count);
+
 //================================================================================
 
 //==============================sd_img2img_options===============================
