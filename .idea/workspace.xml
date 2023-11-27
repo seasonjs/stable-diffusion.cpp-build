@@ -20,25 +20,14 @@
   </component>
   <component name="CMakeSettings">
     <configurations>
+      <configuration PROFILE_NAME="Release" ENABLED="true" CONFIG_NAME="Release" />
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.editorconfig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.clang-tidy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/stable-diffusion-build.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/base64.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/base64.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/sd.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/sd.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.h" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +63,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "CMake 调试.stable-diffusion-build.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.RadMigrateCodeStyle": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -87,6 +77,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CMakeSettings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -137,8 +128,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1701087466926</updated>
-      <workItem from="1701087467975" duration="1675000" />
+      <workItem from="1701087467975" duration="5487000" />
     </task>
+    <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
+      <option name="closed" value="true" />
+      <created>1701089224017</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1701089224017</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -148,5 +148,9 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="sync latest stable-diffusion api" />
+    <option name="LAST_COMMIT_MESSAGE" value="sync latest stable-diffusion api" />
   </component>
 </project>
