@@ -165,6 +165,8 @@ jobs:
            defines: '-DSD_AVX2=OFF'
          - build: 'avx512'
            defines: '-DSD_AVX512=ON'
+         - build: 'cuda12'
+           defines: '-DSD_CUBLAS=ON'
 
     steps:
       - name: Clone
@@ -172,6 +174,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+      - name: Install cuda-toolkit
+        id: cuda-toolkit
+        if: ${{ matrix.build == 'cuda12' }}
+        uses: Jimver/cuda-toolkit@v0.2.11
+        with:
+          cuda: '12.2.0'
+        run: |
+          echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
+          echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
+          nvcc -V
 
       - name: Build
         id: cmake_build
