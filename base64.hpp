@@ -4,8 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-namespace code
-{
+namespace code {
     // Interface:
     // Defaults allow for use:
     //   std::string s = "foobar";
@@ -19,23 +18,22 @@ namespace code
     //   std::string s = "foobar";
     //   std::vector<char> encoded = base64_encode<std::vector<char>>(s);
 
-    template <typename RetString = std::string, typename String = std::string>
-    RetString base64_encode(const String& s, bool url = false);
+    template<typename RetString = std::string, typename String = std::string>
+    RetString base64_encode(const String&s, bool url = false);
 
-    template <typename RetString = std::string, typename String = std::string>
-    RetString base64_encode_pem(const String& s);
+    template<typename RetString = std::string, typename String = std::string>
+    RetString base64_encode_pem(const String&s);
 
-    template <typename RetString = std::string, typename String = std::string>
-    RetString base64_encode_mime(const String& s);
+    template<typename RetString = std::string, typename String = std::string>
+    RetString base64_encode_mime(const String&s);
 
-    template <typename RetString = std::string, typename String = std::string>
-    RetString base64_decode(const String& s);
+    template<typename RetString = std::string, typename String = std::string>
+    RetString base64_decode(const String&s);
 
-    template <typename RetString = std::string>
+    template<typename RetString = std::string>
     RetString base64_encode(const unsigned char* bytes_to_encode, size_t len, bool url = false);
 
-    namespace detail
-    {
+    namespace detail {
         //
         // Depending on the url parameter in base64_chars, one of
         // two sets of base64 characters needs to be chosen.
@@ -72,8 +70,7 @@ namespace code
             64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
         };
 
-        inline unsigned int pos_of_char(const unsigned char chr)
-        {
+        inline unsigned int pos_of_char(const unsigned char chr) {
             //
             // Return the position of chr within base64_encode()
             //
@@ -87,23 +84,19 @@ namespace code
             throw std::runtime_error("Input is not valid base64-encoded data.");
         }
 
-        template <typename RetString, typename String>
-        RetString insert_linebreaks(const String& str, size_t distance)
-        {
+        template<typename RetString, typename String>
+        RetString insert_linebreaks(const String&str, size_t distance) {
             //
             // Provided by https://github.com/JomaCorpFX, adapted by Rene & Kevin
             //
-            if (!str.size())
-            {
+            if (!str.size()) {
                 return RetString{};
             }
 
-            if (distance < str.size())
-            {
+            if (distance < str.size()) {
                 size_t pos = distance;
                 String s{str};
-                while (pos < s.size())
-                {
+                while (pos < s.size()) {
                     s.insert(pos, "\n");
                     pos += distance + 1;
                 }
@@ -112,34 +105,29 @@ namespace code
             return str;
         }
 
-        template <typename RetString, typename String, unsigned int line_length>
-        RetString encode_with_line_breaks(String s)
-        {
+        template<typename RetString, typename String, unsigned int line_length>
+        RetString encode_with_line_breaks(String s) {
             return insert_linebreaks<RetString, String>(base64_encode(s, false), line_length);
         }
 
-        template <typename RetString, typename String>
-        RetString encode_pem(String s)
-        {
+        template<typename RetString, typename String>
+        RetString encode_pem(String s) {
             return encode_with_line_breaks<RetString, String, 64>(s);
         }
 
-        template <typename RetString, typename String>
-        RetString encode_mime(String s)
-        {
+        template<typename RetString, typename String>
+        RetString encode_mime(String s) {
             return encode_with_line_breaks<RetString, String, 76>(s);
         }
 
-        template <typename RetString, typename String>
-        RetString encode(String s, const bool url)
-        {
-            return base64_encode<RetString>(reinterpret_cast<const unsigned char*>(s.data()), s.size(), url);
+        template<typename RetString, typename String>
+        RetString encode(String s, const bool url) {
+            return base64_encode<RetString>(reinterpret_cast<const unsigned char *>(s.data()), s.size(), url);
         }
     } // namespace detail
 
-    template <typename RetString>
-    RetString base64_encode(const unsigned char* bytes_to_encode, const size_t len, const bool url)
-    {
+    template<typename RetString>
+    RetString base64_encode(const unsigned char* bytes_to_encode, const size_t len, const bool url) {
         size_t len_encoded = (len + 2) / 3 * 4;
 
         unsigned char trailing_char = url ? '.' : '=';
@@ -160,29 +148,24 @@ namespace code
 
         unsigned int pos = 0;
 
-        while (pos < len)
-        {
+        while (pos < len) {
             ret.push_back(base64_chars_[(bytes_to_encode[pos + 0] & 0xfc) >> 2]);
 
-            if (pos + 1 < len)
-            {
+            if (pos + 1 < len) {
                 ret.push_back(base64_chars_[((bytes_to_encode[pos + 0] & 0x03) << 4) +
-                    ((bytes_to_encode[pos + 1] & 0xf0) >> 4)]);
+                                            ((bytes_to_encode[pos + 1] & 0xf0) >> 4)]);
 
-                if (pos + 2 < len)
-                {
+                if (pos + 2 < len) {
                     ret.push_back(base64_chars_[((bytes_to_encode[pos + 1] & 0x0f) << 2) +
-                        ((bytes_to_encode[pos + 2] & 0xc0) >> 6)]);
+                                                ((bytes_to_encode[pos + 2] & 0xc0) >> 6)]);
                     ret.push_back(base64_chars_[bytes_to_encode[pos + 2] & 0x3f]);
                 }
-                else
-                {
+                else {
                     ret.push_back(base64_chars_[(bytes_to_encode[pos + 1] & 0x0f) << 2]);
                     ret.push_back(trailing_char);
                 }
             }
-            else
-            {
+            else {
                 ret.push_back(base64_chars_[(bytes_to_encode[pos + 0] & 0x03) << 4]);
                 ret.push_back(trailing_char);
                 ret.push_back(trailing_char);
@@ -194,11 +177,9 @@ namespace code
         return ret;
     }
 
-    namespace detail
-    {
-        template <typename RetString, typename String>
-        RetString decode(const String& encoded_string)
-        {
+    namespace detail {
+        template<typename RetString, typename String>
+        RetString decode(const String&encoded_string) {
             // static_assert(!std::is_same_v<RetString, std::string_view>);
 
             //
@@ -206,8 +187,7 @@ namespace code
             // or std::string_view (requires at least C++17)
             //
 
-            if (encoded_string.empty())
-            {
+            if (encoded_string.empty()) {
                 return RetString{};
             }
 
@@ -225,8 +205,7 @@ namespace code
             RetString ret;
             ret.reserve(approx_length_of_decoded_string);
 
-            while (pos < length_of_string)
-            {
+            while (pos < length_of_string) {
                 //
                 // Iterate over encoded input string in chunks. The size of all
                 // chunks except the last one is 4 bytes.
@@ -247,13 +226,12 @@ namespace code
                 //
                 ret.push_back(
                     static_cast<typename RetString::value_type>((pos_of_char(encoded_string.at(pos + 0)) << 2) + ((
-                        pos_of_char_1 & 0x30) >> 4)));
+                                                                        pos_of_char_1 & 0x30) >> 4)));
 
                 if (pos + 2 < length_of_string &&
                     // Check for data that is not padded with equal signs (which is allowed by RFC 2045)
                     encoded_string.at(pos + 2) != '=' &&
-                    encoded_string.at(pos + 2) != '.')
-                {
+                    encoded_string.at(pos + 2) != '.') {
                     // accept URL-safe base 64 strings, too, so check for '.' also.
                     //
                     // Emit a chunk's second byte (which might not be produced in the last chunk).
@@ -261,18 +239,17 @@ namespace code
                     const unsigned int pos_of_char_2 = pos_of_char(encoded_string.at(pos + 2));
                     ret.push_back(
                         static_cast<typename RetString::value_type>(((pos_of_char_1 & 0x0f) << 4) + ((pos_of_char_2 &
-                            0x3c) >> 2)));
+                                                                            0x3c) >> 2)));
 
                     if (pos + 3 < length_of_string &&
                         encoded_string.at(pos + 3) != '=' &&
-                        encoded_string.at(pos + 3) != '.')
-                    {
+                        encoded_string.at(pos + 3) != '.') {
                         //
                         // Emit a chunk's third byte (which might not be produced in the last chunk).
                         //
                         ret.push_back(
                             static_cast<typename RetString::value_type>(((pos_of_char_2 & 0x03) << 6) + pos_of_char(
-                                encoded_string.at(pos + 3))));
+                                                                            encoded_string.at(pos + 3))));
                     }
                 }
 
@@ -283,27 +260,23 @@ namespace code
         }
     } // namespace detail
 
-    template <typename RetString, typename String>
-    RetString base64_decode(const String& s)
-    {
+    template<typename RetString, typename String>
+    RetString base64_decode(const String&s) {
         return detail::decode<RetString, String>(s);
     }
 
-    template <typename RetString, typename String>
-    RetString base64_encode(const String& s, const bool url)
-    {
+    template<typename RetString, typename String>
+    RetString base64_encode(const String&s, const bool url) {
         return detail::encode<RetString, String>(s, url);
     }
 
-    template <typename RetString, typename String>
-    RetString base64_encode_pem(const String& s)
-    {
+    template<typename RetString, typename String>
+    RetString base64_encode_pem(const String&s) {
         return detail::encode_pem<RetString, String>(s);
     }
 
-    template <typename RetString, typename String>
-    RetString base64_encode_mime(const String& s)
-    {
+    template<typename RetString, typename String>
+    RetString base64_encode_mime(const String&s) {
         return detail::encode_mime<RetString, String>(s);
     }
 }

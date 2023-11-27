@@ -2,7 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cmake-build-debug-visual-studio/_deps/sd-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/cmake-build-debug-visual-studio/_deps/sd-src/ggml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/sd-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/build/_deps/sd-src/ggml" vcs="Git" />
   </component>
 </project>

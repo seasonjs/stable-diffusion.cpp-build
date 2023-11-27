@@ -4,7 +4,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
     include(add_FetchContent_MakeAvailable.cmake)
 endif()
 
-set(SD_GIT_TAG  46eacf7fa133e98df6f51b769e4bb68a48ff3fa3)
+set(SD_GIT_TAG  1ac4ad2ba21c7f1c96c061f452bde129522a85c1)
 set(SD_GIT_URL  https://github.com/Cyberhan123/stable-diffusion.cpp)
 
 FetchContent_Declare(
