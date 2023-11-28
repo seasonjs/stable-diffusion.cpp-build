@@ -25,11 +25,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="sync">
+    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/sd.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/sd.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.h" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,17 +39,16 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__algorithm/copy_n.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/string" root0="FORCE_HIGHLIGHTING" />
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/vector" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/cmake-build-debug/_deps/sd-src/examples/convert/vocab.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -95,9 +94,9 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake 应用程序.sd-abi">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
     <configuration name="common" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="stable-diffusion-build" TARGET_NAME="common" CONFIG_NAME="Debug">
@@ -142,7 +141,8 @@
       <option name="presentableId" value="Default" />
       <updated>1701087466926</updated>
       <workItem from="1701087467975" duration="6974000" />
-      <workItem from="1701098984149" duration="6458000" />
+      <workItem from="1701098984149" duration="7761000" />
+      <workItem from="1701186312954" duration="3843000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -200,7 +200,15 @@
       <option name="project" value="LOCAL" />
       <updated>1701100930343</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="sync main clean up code">
+      <option name="closed" value="true" />
+      <created>1701175409019</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1701175409019</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -229,6 +237,8 @@
     <MESSAGE value="add" />
     <MESSAGE value="add set_txt2img_batch_count api" />
     <MESSAGE value="test for cuda build on windows" />
-    <option name="LAST_COMMIT_MESSAGE" value="test for cuda build on windows" />
+    <MESSAGE value="sync" />
+    <MESSAGE value="sync main clean up code" />
+    <option name="LAST_COMMIT_MESSAGE" value="sync main clean up code" />
   </component>
 </project>

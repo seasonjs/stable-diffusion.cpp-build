@@ -7,12 +7,12 @@
 #ifdef STABLE_DIFFUSION_SHARED
 #if defined(_WIN32) && !defined(__MINGW32__)
 #ifdef STABLE_DIFFUSION_BUILD
-            #define STABLE_DIFFUSION_API __declspec(dllexport)
+    #define STABLE_DIFFUSION_API __declspec(dllexport)
 #else
-            #define STABLE_DIFFUSION_API __declspec(dllimport)
+    #define STABLE_DIFFUSION_API __declspec(dllimport)
 #endif
 #else
-#define STABLE_DIFFUSION_API __attribute__((visibility("default")))
+    #define STABLE_DIFFUSION_API __attribute__((visibility("default")))
 #endif
 #else
     #define STABLE_DIFFUSION_API
@@ -83,9 +83,9 @@ STABLE_DIFFUSION_API void destroy_stable_diffusion(void* sd);
 
 STABLE_DIFFUSION_API bool load_from_file(void* sd, const char* file_path, const char* schedule);
 
-STABLE_DIFFUSION_API const char* txt2img(void* sd, const sd_txt2img_options* opt);
+STABLE_DIFFUSION_API const uint8_t* txt2img(void* sd, const sd_txt2img_options* opt);
 
-STABLE_DIFFUSION_API const char* img2img(void* sd, const sd_img2img_options* opt);
+STABLE_DIFFUSION_API const uint8_t* img2img(void* sd, const sd_img2img_options* opt);
 
 STABLE_DIFFUSION_API void set_stable_diffusion_log_level(const char* level);
 

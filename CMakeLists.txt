@@ -54,5 +54,3 @@ set_target_properties(stable-diffusion PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
 target_link_libraries(${SD_ABI} PRIVATE ggml stable-diffusion ${CMAKE_THREAD_LIBS_INIT})
-
-

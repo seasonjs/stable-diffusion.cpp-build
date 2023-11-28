@@ -4,8 +4,8 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
     include(add_FetchContent_MakeAvailable.cmake)
 endif()
 
-set(SD_GIT_TAG  70d2919decdf8f5fcd4956d1da60594c9e7b03ac)
-set(SD_GIT_URL  https://github.com/Cyberhan123/stable-diffusion.cpp)
+set(SD_GIT_TAG  47dd704198f46ee75b11cbaf3aa2b8f644df0be9)
+set(SD_GIT_URL  https://github.com/leejet/stable-diffusion.cpp)
 set(BUILD_SHARED_LIBS OFF)
 
 FetchContent_Declare(

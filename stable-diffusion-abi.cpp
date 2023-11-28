@@ -1,11 +1,13 @@
 #include "stable-diffusion-abi.h"
 
 #include "stable-diffusion.h"
-#include "base64.hpp"
 #include <string>
 #include <cstring>
 #include <map>
+#include <algorithm>
+#include <iterator>
 #include <vector>
+
 /*================================================= StableDiffusion ABI API  =============================================*/
 
 const static std::map<std::string, enum SDLogLevel> SDLogLevelMap = {
@@ -188,7 +190,7 @@ bool load_from_file(void* sd, const char* file_path, const char* schedule) {
     return false;
 };
 
-const char* txt2img(void* sd, const sd_txt2img_options* opt) {
+const uint8_t* txt2img(void* sd, const sd_txt2img_options* opt) {
     const auto sm = std::string(opt->sample_method);
     const auto it = SampleMethodMap.find(sm);
     if (it != SampleMethodMap.end()) {
@@ -204,16 +206,23 @@ const char* txt2img(void* sd, const sd_txt2img_options* opt) {
             opt->seed,
             opt->batch_count
         );
-        const auto str = code::base64_encode<std::string, std::vector<uint8_t *>>(result, false);
-        const auto buffer = new char[str.size()];
-        std::memcpy(buffer, str.c_str(), str.size());
+        const auto image_size = opt->width * opt->height * 3;
+        std::vector<uint8_t> images;
+        images.reserve(image_size * opt->batch_count);
+        for (const auto img: result) {
+            if (img != nullptr) {
+                std::copy_n(img, image_size, std::back_inserter(images));
+            }
+        };
+        const auto buffer = new uint8_t[image_size * opt->batch_count];
+        std::memcpy(buffer, images.data(), images.size());
         return buffer;
     }
     delete opt;
     return nullptr;
 };
 
-const char* img2img(void* sd, const sd_img2img_options* opt) {
+const uint8_t* img2img(void* sd, const sd_img2img_options* opt) {
     const auto sm = std::string(opt->sample_method);
     const auto it = SampleMethodMap.find(sm);
     if (it != SampleMethodMap.end()) {
@@ -230,9 +239,16 @@ const char* img2img(void* sd, const sd_img2img_options* opt) {
             opt->strength,
             opt->seed
         );
-        const auto str = code::base64_encode<std::string, std::vector<uint8_t *>>(result, false);
-        const auto buffer = new char[str.size()];
-        std::memcpy(buffer, str.c_str(), str.size());
+        const auto image_size = opt->width * opt->height * 3;
+        std::vector<uint8_t> images;
+        images.reserve(image_size);
+        for (const auto img: result) {
+            if (img != nullptr) {
+                std::copy_n(img, image_size, std::back_inserter(images));
+            }
+        };
+        const auto buffer = new uint8_t[image_size];
+        std::memcpy(buffer, images.data(), images.size());
         return buffer;
     }
     delete opt;
