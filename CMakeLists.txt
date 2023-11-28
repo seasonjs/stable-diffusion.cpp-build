@@ -26,11 +26,6 @@ option(SD_AVX2 "sd: enable AVX2" ON)
 option(SD_AVX512 "sd: enable AVX512" OFF)
 option(SD_FMA "sd: enable FMA" ON)
 
-
-set(GGML_AVX512 OFF)
-set(GGML_AVX2 OFF)
-set(GGML_AVX OFF)
-
 if (SD_AVX512)
     set(GGML_AVX512 ON)
 elseif (SD_AVX2)

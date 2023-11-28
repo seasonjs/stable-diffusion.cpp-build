@@ -219,17 +219,16 @@ const char* img2img(void* sd, const sd_img2img_options* opt) {
     if (it != SampleMethodMap.end()) {
         const auto s = static_cast<StableDiffusion *>(sd);
         const auto result = s->img2img(
-            /* const std::vector<uint8_t>& init_img */ opt->init_img,
-                                                       /* const std::string &prompt */ std::string(opt->prompt),
-                                                       /* const std::string &negative_prompt */
-                                                       std::string(opt->negative_prompt),
-                                                       /* float cfg_scale */ opt->cfg_scale,
-                                                       /* int width */ opt->width,
-                                                       /* int height */ opt->height,
-                                                       /* SampleMethod sample_method */ it->second,
-                                                       /* int sample_steps */ opt->sample_steps,
-                                                       /* float strength */ opt->strength,
-                                                       /* int64_t seed */ opt->seed
+            opt->init_img,
+            std::string(opt->prompt),
+            std::string(opt->negative_prompt),
+            opt->cfg_scale,
+            opt->width,
+            opt->height,
+            it->second,
+            opt->sample_steps,
+            opt->strength,
+            opt->seed
         );
         const auto str = code::base64_encode<std::string, std::vector<uint8_t *>>(result, false);
         const auto buffer = new char[str.size()];

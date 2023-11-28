@@ -25,7 +25,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="" />
+    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="sync">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/sd.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/sd.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -41,6 +46,9 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/vector" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/cmake-build-debug/_deps/sd-src/examples/convert/vocab.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
@@ -134,7 +142,7 @@
       <option name="presentableId" value="Default" />
       <updated>1701087466926</updated>
       <workItem from="1701087467975" duration="6974000" />
-      <workItem from="1701098984149" duration="1914000" />
+      <workItem from="1701098984149" duration="6458000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -184,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1701100883802</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="test for cuda build on windows">
+      <option name="closed" value="true" />
+      <created>1701100930343</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1701100930343</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -194,6 +210,17 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="sync latest stable-diffusion api" />
