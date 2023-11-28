@@ -1,6 +1,7 @@
 #include "stable-diffusion-abi.h"
 
 #include "stable-diffusion.h"
+#include "base64.hpp"
 #include <string>
 #include <cstring>
 #include <map>
