@@ -25,9 +25,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
+    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="refactor with c abi code">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake/sd.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/sd.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.h" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.h" afterDir="false" />
     </list>
@@ -49,6 +50,7 @@
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/string" root0="FORCE_HIGHLIGHTING" />
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/vector" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/cmake-build-debug/_deps/sd-src/examples/convert/vocab.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -109,7 +111,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="sd-abi" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="stable-diffusion-build" TARGET_NAME="sd-abi" CONFIG_NAME="Debug">
+    <configuration name="sd-abi" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="stable-diffusion-build" TARGET_NAME="sd-abi" CONFIG_NAME="Release">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -142,7 +144,7 @@
       <updated>1701087466926</updated>
       <workItem from="1701087467975" duration="6974000" />
       <workItem from="1701098984149" duration="7761000" />
-      <workItem from="1701186312954" duration="3843000" />
+      <workItem from="1701186312954" duration="14282000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -208,7 +210,23 @@
       <option name="project" value="LOCAL" />
       <updated>1701175409019</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="fix abi call fail out of stack">
+      <option name="closed" value="true" />
+      <created>1701191898311</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1701191898312</updated>
+    </task>
+    <task id="LOCAL-00010" summary="add base64 file header">
+      <option name="closed" value="true" />
+      <created>1701191932994</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1701191932994</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -239,6 +257,10 @@
     <MESSAGE value="test for cuda build on windows" />
     <MESSAGE value="sync" />
     <MESSAGE value="sync main clean up code" />
-    <option name="LAST_COMMIT_MESSAGE" value="sync main clean up code" />
+    <MESSAGE value="fix" />
+    <MESSAGE value="fix abi call fail out of stack" />
+    <MESSAGE value="add base64 file header" />
+    <MESSAGE value="refactor with c abi code" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor with c abi code" />
   </component>
 </project>

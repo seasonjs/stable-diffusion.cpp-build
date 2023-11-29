@@ -151,7 +151,7 @@ jobs:
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
           cuda: '12.2.0'
-          
+
       - name: Peek cuda-toolkit info
         id: peek_cuda_toolkit
         if: ${{ matrix.build == 'cuda12' }}
@@ -159,7 +159,7 @@ jobs:
           echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
           echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
           nvcc -V
-          
+
       - name: Build
         id: cmake_build
         run: |
@@ -190,7 +190,8 @@ jobs:
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         run: |
-          7z a stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-win-${{ matrix.build }}-x64.zip .\build\bin\Release\sd-abi.dll
+          Rename-Item -Path .\build\bin\Release\sd-abi.dll -NewName sd-abi_${{ matrix.build }}.dll
+          7z a stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-win-${{ matrix.build }}-x64.zip .\build\bin\Release\sd-abi_${{ matrix.build }}.dll
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}

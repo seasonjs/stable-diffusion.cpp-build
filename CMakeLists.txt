@@ -44,8 +44,7 @@ set(SD_ABI sd-abi)
 
 add_library(${SD_ABI} SHARED
         stable-diffusion-abi.cpp
-        stable-diffusion-abi.h
-        base64.hpp)
+        stable-diffusion-abi.h)
 
 target_include_directories(${SD_ABI} PUBLIC .)
 

@@ -1,7 +1,6 @@
 #include "stable-diffusion-abi.h"
 
 #include "stable-diffusion.h"
-#include "base64.hpp"
 #include <string>
 #include <cstring>
 #include <map>
@@ -10,7 +9,6 @@
 #include <vector>
 
 /*================================================= StableDiffusion ABI API  =============================================*/
-
 const static std::map<std::string, enum SDLogLevel> SDLogLevelMap = {
     {"DEBUG", DEBUG},
     {"INFO", INFO},
@@ -42,120 +40,92 @@ const static std::map<std::string, enum Schedule> ScheduleMap = {
     {"N_SCHEDULES", N_SCHEDULES},
 };
 
-// Use setter to handle purego max args limit less than 9
-// see https://github.com/ebitengine/purego/pull/7
-//     https://github.com/ebitengine/purego/blob/4db9e9e813d0f24f3ccc85a843d2316d2d2a70c6/func.go#L104
-struct sd_txt2img_options {
-    const char* prompt;
-    const char* negative_prompt;
-    float cfg_scale;
-    int width;
-    int height;
-    const char* sample_method;
-    int sample_steps;
-    int64_t seed;
-    int batch_count;
+void stable_diffusion_full_params_set_negative_prompt(
+    struct stable_diffusion_full_params* params,
+    const char* negative_prompt
+) {
+    params->negative_prompt.assign(negative_prompt);
+}
+
+void stable_diffusion_full_params_set_cfg_scale(
+    struct stable_diffusion_full_params* params,
+    const float cfg_scale
+) {
+    params->cfg_scale = cfg_scale;
+}
+
+void stable_diffusion_full_params_set_width(
+    struct stable_diffusion_full_params* params,
+    const int width
+) {
+    params->width = width;
+}
+
+void stable_diffusion_full_params_set_height(
+    struct stable_diffusion_full_params* params,
+    const int height
+) {
+    params->height = height;
+}
+
+void stable_diffusion_full_params_set_sample_method(
+    struct stable_diffusion_full_params* params,
+    const char* sample_method
+) {
+    const auto e_sample_method = SampleMethodMap.find(std::string(sample_method));
+    if (e_sample_method != SampleMethodMap.end()) {
+        params->sample_method = e_sample_method->second;
+    }
+}
+
+void stable_diffusion_full_params_set_sample_steps(
+    struct stable_diffusion_full_params* params,
+    int sample_steps
+) {
+    params->sample_steps = sample_steps;
+}
+
+
+void stable_diffusion_full_params_set_seed(
+    struct stable_diffusion_full_params* params,
+    int64_t seed
+) {
+    params->seed = seed;
+}
+
+void stable_diffusion_full_params_set_batch_count(
+    struct stable_diffusion_full_params* params,
+    int batch_count
+) {
+    params->batch_count = batch_count;
+}
+
+void stable_diffusion_full_params_set_strength(
+    struct stable_diffusion_full_params* params,
+    float strength
+) {
+    params->strength = strength;
+}
+
+struct stable_diffusion_full_params* stable_diffusion_full_default_params_ref() {
+    return new stable_diffusion_full_params{
+        "",
+        0.0f,
+        0,
+        0,
+        EULER_A,
+        0,
+        0,
+        1,
+        0.0f
+    };
+}
+
+struct stable_diffusion_ctx {
+    StableDiffusion* sd;
 };
 
-struct sd_img2img_options {
-    uint8_t* init_img;
-    const char* prompt;
-    const char* negative_prompt;
-    float cfg_scale;
-    int width;
-    int height;
-    const char* sample_method;
-    int sample_steps;
-    float strength;
-    int64_t seed;
-};
-
-sd_txt2img_options* new_sd_txt2img_options() {
-    const auto opt = new sd_txt2img_options{};
-    return opt;
-};
-
-sd_img2img_options* new_sd_img2img_options() {
-    const auto opt = new sd_img2img_options{};
-    return opt;
-};
-
-// Implementation for txt2img options setters
-void set_txt2img_prompt(sd_txt2img_options* opt, const char* prompt) {
-    opt->prompt = prompt;
-}
-
-void set_txt2img_negative_prompt(sd_txt2img_options* opt, const char* negative_prompt) {
-    opt->negative_prompt = negative_prompt;
-}
-
-void set_txt2img_cfg_scale(sd_txt2img_options* opt, const float cfg_scale) {
-    opt->cfg_scale = cfg_scale;
-}
-
-void set_txt2img_size(sd_txt2img_options* opt, const int width, const int height) {
-    opt->width = width;
-    opt->height = height;
-}
-
-void set_txt2img_sample_method(sd_txt2img_options* opt, const char* sample_method) {
-    opt->sample_method = sample_method;
-}
-
-void set_txt2img_sample_steps(sd_txt2img_options* opt, const int sample_steps) {
-    opt->sample_steps = sample_steps;
-}
-
-void set_txt2img_seed(sd_txt2img_options* opt, const int64_t seed) {
-    opt->seed = seed;
-}
-
-void set_txt2img_batch_count(sd_txt2img_options* opt, int batch_count) {
-    opt->batch_count = batch_count;
-}
-
-void set_img2img_init_img(sd_img2img_options* opt, const char* init_img) {
-    const auto init_image = code::base64_decode<std::vector<uint8_t>, std::string>(init_img);
-    opt->init_img = new uint8_t[init_image.size()];
-    std::memcpy(opt->init_img, init_image.data(), init_image.size() * sizeof(uint8_t));
-}
-
-void set_img2img_prompt(sd_img2img_options* opt, const char* prompt) {
-    opt->prompt = prompt;
-}
-
-void set_img2img_negative_prompt(sd_img2img_options* opt, const char* negative_prompt) {
-    opt->negative_prompt = negative_prompt;
-}
-
-void set_img2img_cfg_scale(sd_img2img_options* opt, const float cfg_scale) {
-    // Assuming cfg_scale is a floating point number in string format
-    opt->cfg_scale = cfg_scale;
-}
-
-void set_img2img_size(sd_img2img_options* opt, const int width, const int height) {
-    opt->width = width;
-    opt->height = height;
-}
-
-void set_img2img_sample_method(sd_img2img_options* opt, const char* sample_method) {
-    opt->sample_method = sample_method;
-}
-
-void set_img2img_sample_steps(sd_img2img_options* opt, const int sample_steps) {
-    opt->sample_steps = sample_steps;
-}
-
-void set_img2img_strength(sd_img2img_options* opt, const float strength) {
-    // Assuming strength is a floating point number
-    opt->strength = strength;
-}
-
-void set_img2img_seed(sd_img2img_options* opt, const int64_t seed) {
-    opt->seed = seed;
-}
-
-void* create_stable_diffusion(
+struct stable_diffusion_ctx* stable_diffusion_init(
     const int n_threads,
     const bool vae_decode_only,
     const bool free_params_immediately,
@@ -164,99 +134,94 @@ void* create_stable_diffusion(
 ) {
     const auto s = std::string(rng_type);
     const auto it = RNGTypeMap.find(s);
+    const auto ctx = new stable_diffusion_ctx{};
     if (it != RNGTypeMap.end()) {
-        return new StableDiffusion(
+        const auto sd = new StableDiffusion(
             n_threads,
             vae_decode_only,
             free_params_immediately,
             std::string(lora_model_dir),
             it->second
         );
+        ctx->sd = sd;
     }
-    return nullptr;
+    return ctx;
 };
 
-void destroy_stable_diffusion(void* sd) {
-    const auto s = static_cast<StableDiffusion *>(sd);
-    delete s;
-};
 
-bool load_from_file(void* sd, const char* file_path, const char* schedule) {
-    const auto s = static_cast<StableDiffusion *>(sd);
-    const auto sc = std::string(schedule);
-    const auto it = ScheduleMap.find(sc);
-    if (it != ScheduleMap.end()) {
-        return s->load_from_file(std::string(file_path), it->second);
+bool stable_diffusion_load_from_file(
+    const struct stable_diffusion_ctx* ctx,
+    const char* file_path,
+    const char* schedule
+) {
+    const auto e_schedule = ScheduleMap.find(std::string(schedule));
+    if (e_schedule != ScheduleMap.end()) {
+        return ctx->sd->load_from_file(std::string(file_path), e_schedule->second);
     }
     return false;
 };
 
-const uint8_t* txt2img(void* sd, const sd_txt2img_options* opt) {
-    const auto sm = std::string(opt->sample_method);
-    const auto it = SampleMethodMap.find(sm);
-    if (it != SampleMethodMap.end()) {
-        const auto s = static_cast<StableDiffusion *>(sd);
-        const auto result = s->txt2img(
-            std::string(opt->prompt),
-            std::string(opt->negative_prompt),
-            opt->cfg_scale,
-            opt->width,
-            opt->height,
-            it->second,
-            opt->sample_steps,
-            opt->seed,
-            opt->batch_count
-        );
-        const auto image_size = opt->width * opt->height * 3;
-        std::vector<uint8_t> images;
-        images.reserve(image_size * opt->batch_count);
-        for (const auto img: result) {
-            if (img != nullptr) {
-                std::copy_n(img, image_size, std::back_inserter(images));
-            }
-        };
-        const auto buffer = new uint8_t[image_size * opt->batch_count];
-        std::memcpy(buffer, images.data(), images.size());
-        return buffer;
-    }
-    delete opt;
-    return nullptr;
+const uint8_t* stable_diffusion_predict_image(
+    const struct stable_diffusion_ctx* ctx,
+    const struct stable_diffusion_full_params* params,
+    const char* prompt
+) {
+    const auto result = ctx->sd->txt2img(
+        std::string(prompt),
+        params->negative_prompt,
+        params->cfg_scale,
+        params->width,
+        params->height,
+        params->sample_method,
+        params->sample_steps,
+        params->seed,
+        params->batch_count
+    );
+    const auto image_size = params->width * params->height * 3;
+    std::vector<uint8_t> images;
+    images.reserve(image_size * params->batch_count);
+    for (const auto img: result) {
+        if (img != nullptr) {
+            std::copy_n(img, image_size, std::back_inserter(images));
+        }
+    };
+    const auto buffer = new uint8_t[image_size * params->batch_count];
+    std::memcpy(buffer, images.data(), images.size());
+    return buffer;
 };
 
-const uint8_t* img2img(void* sd, const sd_img2img_options* opt) {
-    const auto sm = std::string(opt->sample_method);
-    const auto it = SampleMethodMap.find(sm);
-    if (it != SampleMethodMap.end()) {
-        const auto s = static_cast<StableDiffusion *>(sd);
-        const auto result = s->img2img(
-            opt->init_img,
-            std::string(opt->prompt),
-            std::string(opt->negative_prompt),
-            opt->cfg_scale,
-            opt->width,
-            opt->height,
-            it->second,
-            opt->sample_steps,
-            opt->strength,
-            opt->seed
-        );
-        const auto image_size = opt->width * opt->height * 3;
-        std::vector<uint8_t> images;
-        images.reserve(image_size);
-        for (const auto img: result) {
-            if (img != nullptr) {
-                std::copy_n(img, image_size, std::back_inserter(images));
-            }
-        };
-        const auto buffer = new uint8_t[image_size];
-        std::memcpy(buffer, images.data(), images.size());
-        return buffer;
-    }
-    delete opt;
-    return nullptr;
+const uint8_t* stable_diffusion_image_predict_image(
+    const struct stable_diffusion_ctx* ctx,
+    const struct stable_diffusion_full_params* params,
+    const uint8_t* init_image,
+    const char* prompt
+) {
+    const auto result = ctx->sd->img2img(
+        init_image,
+        std::string(prompt),
+        params->negative_prompt,
+        params->cfg_scale,
+        params->width,
+        params->height,
+        params->sample_method,
+        params->sample_steps,
+        params->strength,
+        params->seed
+    );
+    const auto image_size = params->width * params->height * 3;
+    std::vector<uint8_t> images;
+    images.reserve(image_size);
+    for (const auto img: result) {
+        if (img != nullptr) {
+            std::copy_n(img, image_size, std::back_inserter(images));
+        }
+    };
+    const auto buffer = new uint8_t[image_size];
+    std::memcpy(buffer, images.data(), images.size());
+    return buffer;
 };
 
-void set_stable_diffusion_log_level(const char* level) {
+void stable_diffusion_set_log_level(const char* level) {
     const auto ll = std::string(level);
     const auto it = SDLogLevelMap.find(ll);
     if (it != SDLogLevelMap.end()) {
@@ -264,7 +229,7 @@ void set_stable_diffusion_log_level(const char* level) {
     }
 };
 
-const char* get_stable_diffusion_system_info() {
+const char* stable_diffusion_get_system_info() {
     const std::string info = sd_get_system_info();
     const size_t length = info.size() + 1;
     const auto buffer = new char[length];
@@ -272,6 +237,15 @@ const char* get_stable_diffusion_system_info() {
     return buffer;
 };
 
-void free_buffer(const char* buffer) {
+void stable_diffusion_free(const struct stable_diffusion_ctx* ctx) {
+    delete ctx->sd;
+    delete ctx;
+};
+
+void stable_diffusion_free_full_params(const struct stable_diffusion_full_params* params) {
+    delete params;
+}
+
+void stable_diffusion_free_buffer(const uint8_t* buffer) {
     delete [] buffer;
 }
