@@ -27,7 +27,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,7 +141,7 @@
       <updated>1701087466926</updated>
       <workItem from="1701087467975" duration="6974000" />
       <workItem from="1701098984149" duration="7761000" />
-      <workItem from="1701186312954" duration="16265000" />
+      <workItem from="1701186312954" duration="19577000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -231,7 +231,23 @@
       <option name="project" value="LOCAL" />
       <updated>1701275846074</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="fix build on darwin arm">
+      <option name="closed" value="true" />
+      <created>1701345952809</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1701345952809</updated>
+    </task>
+    <task id="LOCAL-00013" summary="speed up cuda on windows">
+      <option name="closed" value="true" />
+      <created>1701350085486</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1701350085486</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +282,9 @@
     <MESSAGE value="fix abi call fail out of stack" />
     <MESSAGE value="add base64 file header" />
     <MESSAGE value="refactor with c abi code" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor with c abi code" />
+    <MESSAGE value="fix build on darw" />
+    <MESSAGE value="fix build on darwin arm" />
+    <MESSAGE value="speed up cuda on windows" />
+    <option name="LAST_COMMIT_MESSAGE" value="speed up cuda on windows" />
   </component>
 </project>
