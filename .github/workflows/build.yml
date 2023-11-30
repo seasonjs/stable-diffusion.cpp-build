@@ -152,6 +152,7 @@ jobs:
         with:
           cuda: '12.2.0'
           method: 'local'
+          sub-packages: '["cudart","nvcc","cublas"]'
 
       - name: Peek cuda-toolkit info
         id: peek_cuda_toolkit
