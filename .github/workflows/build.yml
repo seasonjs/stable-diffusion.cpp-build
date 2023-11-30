@@ -151,6 +151,7 @@ jobs:
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
           cuda: '12.2.0'
+          method: 'local'
 
       - name: Peek cuda-toolkit info
         id: peek_cuda_toolkit

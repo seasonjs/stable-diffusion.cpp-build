@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
+
+if (APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif ()
+
 project("stable-diffusion-build")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -52,4 +57,4 @@ set_target_properties(ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(stable-diffusion PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
-target_link_libraries(${SD_ABI} PRIVATE ggml stable-diffusion ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${SD_ABI} PRIVATE stable-diffusion ${CMAKE_THREAD_LIBS_INIT})
