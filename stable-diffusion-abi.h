@@ -1,6 +1,7 @@
 #ifndef STABLE_DIFFUSION_ABI_H
 #define STABLE_DIFFUSION_ABI_H
 
+#include "ggml/ggml.h"
 #include "stable-diffusion.h"
 
 #ifdef STABLE_DIFFUSION_SHARED
@@ -90,6 +91,7 @@ STABLE_DIFFUSION_API void stable_diffusion_full_params_set_strength(
 STABLE_DIFFUSION_API stable_diffusion_ctx* stable_diffusion_init(
     int n_threads,
     bool vae_decode_only,
+    const char *taesd_path,
     bool free_params_immediately,
     const char* lora_model_dir,
     const char* rng_type
@@ -99,6 +101,8 @@ STABLE_DIFFUSION_API stable_diffusion_ctx* stable_diffusion_init(
 STABLE_DIFFUSION_API bool stable_diffusion_load_from_file(
     const struct stable_diffusion_ctx* ctx,
     const char* file_path,
+    const char* vae_path,
+    const char* wtype,
     const char* schedule
 );
 
@@ -119,11 +123,11 @@ STABLE_DIFFUSION_API void stable_diffusion_set_log_level(const char* level);
 
 STABLE_DIFFUSION_API const char* stable_diffusion_get_system_info();
 
-STABLE_DIFFUSION_API void stable_diffusion_free(const struct stable_diffusion_ctx* ctx);
+STABLE_DIFFUSION_API void stable_diffusion_free(struct stable_diffusion_ctx* ctx);
 
-STABLE_DIFFUSION_API void stable_diffusion_free_full_params(const struct stable_diffusion_full_params* params);
+STABLE_DIFFUSION_API void stable_diffusion_free_full_params(struct stable_diffusion_full_params* params);
 
-STABLE_DIFFUSION_API void stable_diffusion_free_buffer(const uint8_t* buffer);
+STABLE_DIFFUSION_API void stable_diffusion_free_buffer(uint8_t* buffer);
 
 #ifdef __cplusplus
 }

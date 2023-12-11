@@ -1,6 +1,7 @@
 #include "stable-diffusion-abi.h"
 
 #include "stable-diffusion.h"
+#include "util.h"
 #include <string>
 #include <cstring>
 #include <map>
@@ -38,6 +39,17 @@ const static std::map<std::string, enum Schedule> ScheduleMap = {
     {"DISCRETE", DISCRETE},
     {"KARRAS", KARRAS},
     {"N_SCHEDULES", N_SCHEDULES},
+};
+
+const static std::map<std::string, enum ggml_type> ggmlTypeMap = {
+    {"DEFAULT", GGML_TYPE_COUNT},
+    {"F32", GGML_TYPE_F32},
+    {"F16", GGML_TYPE_F16},
+    {"Q4_0", GGML_TYPE_Q4_0},
+    {"Q4_1", GGML_TYPE_Q4_1},
+    {"Q5_0", GGML_TYPE_Q5_0},
+    {"Q5_1", GGML_TYPE_Q5_1},
+    {"Q8_0", GGML_TYPE_Q8_0},
 };
 
 void stable_diffusion_full_params_set_negative_prompt(
@@ -128,6 +140,7 @@ struct stable_diffusion_ctx {
 struct stable_diffusion_ctx* stable_diffusion_init(
     const int n_threads,
     const bool vae_decode_only,
+    const char * taesd_path,
     const bool free_params_immediately,
     const char* lora_model_dir,
     const char* rng_type
@@ -139,6 +152,7 @@ struct stable_diffusion_ctx* stable_diffusion_init(
         const auto sd = new StableDiffusion(
             n_threads,
             vae_decode_only,
+            std::string(taesd_path),
             free_params_immediately,
             std::string(lora_model_dir),
             it->second
@@ -152,11 +166,23 @@ struct stable_diffusion_ctx* stable_diffusion_init(
 bool stable_diffusion_load_from_file(
     const struct stable_diffusion_ctx* ctx,
     const char* file_path,
+    const char* vae_path,
+    const char* wtype,
     const char* schedule
 ) {
+     auto e_wtype=ggmlTypeMap.find(std::string(wtype));
+    if (e_wtype!=ggmlTypeMap.end()){
+        e_wtype=ggmlTypeMap.find("DEFAULT");
+    }
+
     const auto e_schedule = ScheduleMap.find(std::string(schedule));
     if (e_schedule != ScheduleMap.end()) {
-        return ctx->sd->load_from_file(std::string(file_path), e_schedule->second);
+        return ctx->sd->load_from_file(
+                std::string(file_path),
+                std::string(vae_path),
+                e_wtype->second ,
+                e_schedule->second
+                );
     }
     return false;
 };
@@ -237,15 +263,27 @@ const char* stable_diffusion_get_system_info() {
     return buffer;
 };
 
-void stable_diffusion_free(const struct stable_diffusion_ctx* ctx) {
-    delete ctx->sd;
-    delete ctx;
+void stable_diffusion_free(struct stable_diffusion_ctx* ctx) {
+    if (ctx!= nullptr){
+        if (ctx->sd!= nullptr){
+            delete ctx->sd;
+            ctx->sd= nullptr;
+        }
+        delete ctx;
+        ctx = nullptr;
+    }
 };
 
-void stable_diffusion_free_full_params(const struct stable_diffusion_full_params* params) {
-    delete params;
+void stable_diffusion_free_full_params( struct stable_diffusion_full_params* params) {
+    if (params!= nullptr){
+        delete params;
+        params = nullptr;
+    }
 }
 
-void stable_diffusion_free_buffer(const uint8_t* buffer) {
-    delete [] buffer;
+void stable_diffusion_free_buffer(uint8_t* buffer) {
+    if (buffer!= nullptr){
+        delete [] buffer;
+        buffer= nullptr;
+    }
 }
