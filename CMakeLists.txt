@@ -1,9 +1,4 @@
 cmake_minimum_required(VERSION 3.12)
-
-if (APPLE)
-    set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
-endif ()
-
 project("stable-diffusion-build")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

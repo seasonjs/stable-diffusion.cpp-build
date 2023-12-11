@@ -93,7 +93,7 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          cmake --build . --config Release
+          cmake --build . --config Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 
       - name: Get commit hash
         id: commit
