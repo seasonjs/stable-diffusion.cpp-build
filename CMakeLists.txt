@@ -52,6 +52,7 @@ add_library(${SD_ABI} SHARED
 
 target_include_directories(${SD_ABI} PUBLIC .)
 
+set_target_properties(zip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(stable-diffusion PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
