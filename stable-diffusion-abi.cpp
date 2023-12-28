@@ -141,7 +141,9 @@ struct stable_diffusion_ctx* stable_diffusion_init(
     const int n_threads,
     const bool vae_decode_only,
     const char * taesd_path,
+    const char * esrgan_path,
     const bool free_params_immediately,
+    const bool vae_tiling,
     const char* lora_model_dir,
     const char* rng_type
 ) {
@@ -153,7 +155,9 @@ struct stable_diffusion_ctx* stable_diffusion_init(
             n_threads,
             vae_decode_only,
             std::string(taesd_path),
+            std::string(esrgan_path),
             free_params_immediately,
+            vae_tiling,
             std::string(lora_model_dir),
             it->second
         );
@@ -168,7 +172,8 @@ bool stable_diffusion_load_from_file(
     const char* file_path,
     const char* vae_path,
     const char* wtype,
-    const char* schedule
+    const char* schedule,
+    const int clip_skip
 ) {
      auto e_wtype=ggmlTypeMap.find(std::string(wtype));
     if (e_wtype!=ggmlTypeMap.end()){
@@ -181,7 +186,8 @@ bool stable_diffusion_load_from_file(
                 std::string(file_path),
                 std::string(vae_path),
                 e_wtype->second ,
-                e_schedule->second
+                e_schedule->second,
+                clip_skip
                 );
     }
     return false;

@@ -92,18 +92,20 @@ STABLE_DIFFUSION_API stable_diffusion_ctx* stable_diffusion_init(
     int n_threads,
     bool vae_decode_only,
     const char *taesd_path,
+    const char *esrgan_path,
     bool free_params_immediately,
+    bool vae_tiling,
     const char* lora_model_dir,
     const char* rng_type
 );
-
 
 STABLE_DIFFUSION_API bool stable_diffusion_load_from_file(
     const struct stable_diffusion_ctx* ctx,
     const char* file_path,
     const char* vae_path,
     const char* wtype,
-    const char* schedule
+    const char* schedule,
+    int clip_skip
 );
 
 STABLE_DIFFUSION_API const uint8_t* stable_diffusion_predict_image(
