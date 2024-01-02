@@ -4,7 +4,7 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
     include(add_FetchContent_MakeAvailable.cmake)
 endif()
 
-set(SD_GIT_TAG  0e64238e4c4c902e0c043b741ae48fe22a2fd0fa)
+set(SD_GIT_TAG  f2e4d9793bbe0ec713c28cc55b123c68afd8db90)
 set(SD_GIT_URL  https://github.com/leejet/stable-diffusion.cpp)
 set(BUILD_SHARED_LIBS OFF)
 

@@ -1,8 +1,8 @@
 #ifndef STABLE_DIFFUSION_ABI_H
 #define STABLE_DIFFUSION_ABI_H
 
-#include "ggml/ggml.h"
 #include "stable-diffusion.h"
+#include <string>
 
 #ifdef STABLE_DIFFUSION_SHARED
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -21,19 +21,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct stable_diffusion_ctx;
+struct sd_ctx_t;
 
 struct stable_diffusion_full_params {
-    std::string negative_prompt;
+    const char* negative_prompt;
+    int clip_skip;
     float cfg_scale;
     int width;
     int height;
-    SampleMethod sample_method;
+    sample_method_t sample_method;
     int sample_steps;
+    float strength;
     int64_t seed;
     int batch_count;
-    float strength;
 };
 
 // These methods are used in binding in other languages,golang, python,etc.
@@ -47,7 +47,12 @@ STABLE_DIFFUSION_API void stable_diffusion_full_params_set_negative_prompt(
     const char* negative_prompt
 );
 
-STABLE_DIFFUSION_API void stable_diffusion_full_params_set_cfg_scale(
+STABLE_DIFFUSION_API void stable_diffusion_full_params_set_clip_skip(
+    struct stable_diffusion_full_params* params,
+    int clip_skip
+);
+
+void stable_diffusion_full_params_set_cfg_scale(
     struct stable_diffusion_full_params* params,
     float cfg_scale
 );
@@ -88,46 +93,42 @@ STABLE_DIFFUSION_API void stable_diffusion_full_params_set_strength(
     float strength
 );
 
-STABLE_DIFFUSION_API stable_diffusion_ctx* stable_diffusion_init(
-    int n_threads,
-    bool vae_decode_only,
-    const char *taesd_path,
-    bool free_params_immediately,
-    const char* lora_model_dir,
-    const char* rng_type
-);
-
-
-STABLE_DIFFUSION_API bool stable_diffusion_load_from_file(
-    const struct stable_diffusion_ctx* ctx,
-    const char* file_path,
+STABLE_DIFFUSION_API sd_ctx_t* stable_diffusion_init(
+    const char* model_path,
     const char* vae_path,
+    const char* taesd_path,
+    const char* lora_model_dir,
+    bool vae_decode_only,
+    bool vae_tiling,
+    bool free_params_immediately,
+    int n_threads,
     const char* wtype,
+    const char* rng_type,
     const char* schedule
 );
 
-STABLE_DIFFUSION_API const uint8_t* stable_diffusion_predict_image(
-    const struct stable_diffusion_ctx* ctx,
+STABLE_DIFFUSION_API const sd_image_t* stable_diffusion_predict_image(
+    struct sd_ctx_t* ctx,
     const struct stable_diffusion_full_params* params,
     const char* prompt
 );
 
-STABLE_DIFFUSION_API const uint8_t* stable_diffusion_image_predict_image(
-    const struct stable_diffusion_ctx* ctx,
+STABLE_DIFFUSION_API const sd_image_t* stable_diffusion_image_predict_image(
+    struct sd_ctx_t* ctx,
     const struct stable_diffusion_full_params* params,
-    const uint8_t* init_image,
+    sd_image_t* init_image,
     const char* prompt
 );
 
-STABLE_DIFFUSION_API void stable_diffusion_set_log_level(const char* level);
+STABLE_DIFFUSION_API void stable_diffusion_set_log_callback(sd_log_cb_t sd_log_cb);
 
 STABLE_DIFFUSION_API const char* stable_diffusion_get_system_info();
 
-STABLE_DIFFUSION_API void stable_diffusion_free(struct stable_diffusion_ctx* ctx);
+STABLE_DIFFUSION_API void stable_diffusion_free(struct sd_ctx_t* ctx);
 
 STABLE_DIFFUSION_API void stable_diffusion_free_full_params(struct stable_diffusion_full_params* params);
 
-STABLE_DIFFUSION_API void stable_diffusion_free_buffer(uint8_t* buffer);
+STABLE_DIFFUSION_API void stable_diffusion_free_buffer(const uint8_t* buffer);
 
 #ifdef __cplusplus
 }
