@@ -48,13 +48,20 @@ set(SD_ABI sd-abi)
 
 add_library(${SD_ABI} SHARED
         stable-diffusion-abi.cpp
-        stable-diffusion-abi.h)
+        stable-diffusion-abi.h
+        ${sd_SOURCE_DIR}/stable-diffusion.h
+        ${sd_SOURCE_DIR}/stable-diffusion.cpp
+)
 
 target_include_directories(${SD_ABI} PUBLIC .)
+target_include_directories(${SD_ABI} PUBLIC ${sd_SOURCE_DIR} .)
 
 set_target_properties(zip PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(stable-diffusion PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(${SD_ABI} PUBLIC SD_BUILD_SHARED_LIB)
+target_compile_definitions(${SD_ABI} PRIVATE SD_BUILD_DLL)
 set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
-target_link_libraries(${SD_ABI} PRIVATE stable-diffusion ${CMAKE_THREAD_LIBS_INIT})
+target_compile_definitions(${SD_ABI} PUBLIC STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
+target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_BUILD)
+target_link_libraries(${SD_ABI} PUBLIC stable-diffusion)

@@ -24,9 +24,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="sync latest version">
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+    <list default="true" id="c150e01e-559e-41d7-a687-7c9c6e783fb1" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake/sd.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake/sd.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stable-diffusion-abi.h" beforeDir="false" afterPath="$PROJECT_DIR$/stable-diffusion-abi.h" afterDir="false" />
@@ -46,6 +47,13 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/map" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/cyberhan/development/stable-diffusion.cpp-build/stable-diffusion-abi.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -137,7 +145,7 @@
       <workItem from="1702392751353" duration="627000" />
       <workItem from="1703508474166" duration="1008000" />
       <workItem from="1703589304779" duration="7000" />
-      <workItem from="1704193260346" duration="4883000" />
+      <workItem from="1704193260346" duration="12616000" />
     </task>
     <task id="LOCAL-00001" summary="sync latest stable-diffusion api">
       <option name="closed" value="true" />
@@ -283,7 +291,23 @@
       <option name="project" value="LOCAL" />
       <updated>1703508779376</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="sync with sd refactor">
+      <option name="closed" value="true" />
+      <created>1704198262070</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1704198262070</updated>
+    </task>
+    <task id="LOCAL-00020" summary="sync with sd refactor">
+      <option name="closed" value="true" />
+      <created>1704198490119</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1704198490119</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -325,6 +349,7 @@
     <MESSAGE value="try build cross-platform" />
     <MESSAGE value="fix build fail with arm64" />
     <MESSAGE value="sync latest version" />
-    <option name="LAST_COMMIT_MESSAGE" value="sync latest version" />
+    <MESSAGE value="sync with sd refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="sync with sd refactor" />
   </component>
 </project>
