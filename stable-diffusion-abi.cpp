@@ -267,7 +267,7 @@ void stable_diffusion_free(struct sd_ctx_t* ctx) {
     free_sd_ctx(ctx);
 };
 
-void stable_diffusion_free_full_params(const struct stable_diffusion_full_params* params) {
+void stable_diffusion_free_full_params(struct stable_diffusion_full_params* params) {
     if (params != nullptr) {
         delete params;
         params = nullptr;
