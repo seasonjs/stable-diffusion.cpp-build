@@ -51,6 +51,8 @@ add_library(${SD_ABI} SHARED
         stable-diffusion-abi.h
         ${sd_SOURCE_DIR}/stable-diffusion.h
         ${sd_SOURCE_DIR}/stable-diffusion.cpp
+        ${sd_SOURCE_DIR}/util.cpp
+        ${sd_SOURCE_DIR}/upscaler.cpp
 )
 
 target_include_directories(${SD_ABI} PUBLIC .)
