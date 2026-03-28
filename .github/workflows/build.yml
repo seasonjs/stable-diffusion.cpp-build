@@ -39,7 +39,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/install/linux" \
             -DBUILD_SHARED_LIBS=ON \
-            -DGGML_BACKEND_DLL=ON \
             -DGGML_NATIVE=OFF \
             -DSD_USE_SYSTEM_GGML=ON \
             -DSD_BUILD_EXAMPLES=OFF
@@ -136,7 +135,6 @@ jobs:
             -DCMAKE_INSTALL_RPATH="@loader_path" \
             -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/install/macos" \
             -DBUILD_SHARED_LIBS=ON \
-            -DGGML_BACKEND_DLL=ON \
             -DGGML_NATIVE=OFF \
             -DSD_USE_SYSTEM_GGML=ON \
             -DSD_BUILD_EXAMPLES=OFF
@@ -232,7 +230,6 @@ jobs:
             -DCMAKE_INSTALL_PREFIX="${env:GITHUB_WORKSPACE}\install\windows" `
             -DBUILD_SHARED_LIBS=ON `
             -DGGML_NATIVE=OFF `
-            -DGGML_BACKEND_DLL=ON `
             -DSD_USE_SYSTEM_GGML=ON `
             -DSD_BUILD_EXAMPLES=OFF
 

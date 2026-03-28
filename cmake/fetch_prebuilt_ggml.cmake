@@ -253,10 +253,10 @@ function(ggml_import_prebuilt)
         PATHS "${_ggml_package_root}"
         NO_DEFAULT_PATH)
 
-    # Some prebuilt ggml packages do not export public include directories on
-    # ggml::ggml / ggml::ggml-base when backend loading is enabled. Patch the
+    # Some prebuilt ggml packages do not export public include directories or
+    # the GGML_BACKEND_DL usage requirement on ggml::ggml-base. Patch the
     # imported targets locally so downstream targets (for example llama) can
-    # resolve #include "ggml.h" correctly.
+    # resolve #include "ggml.h" correctly and inherit the backend loader define.
     if (TARGET ggml::ggml)
         get_target_property(_ggml_interface_includes ggml::ggml INTERFACE_INCLUDE_DIRECTORIES)
         if (NOT _ggml_interface_includes)
@@ -270,6 +270,19 @@ function(ggml_import_prebuilt)
         if (NOT _ggml_base_interface_includes)
             set_target_properties(ggml::ggml-base PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${_ggml_package_root}/include")
+        endif()
+
+        if (GGML_BACKEND_DL)
+            get_target_property(_ggml_base_interface_compile_definitions ggml::ggml-base INTERFACE_COMPILE_DEFINITIONS)
+            if (_ggml_base_interface_compile_definitions MATCHES "-NOTFOUND$")
+                set(_ggml_base_interface_compile_definitions "")
+            endif()
+
+            if (NOT _ggml_base_interface_compile_definitions MATCHES "GGML_BACKEND_DL")
+                list(APPEND _ggml_base_interface_compile_definitions GGML_BACKEND_DL)
+                set_target_properties(ggml::ggml-base PROPERTIES
+                    INTERFACE_COMPILE_DEFINITIONS "${_ggml_base_interface_compile_definitions}")
+            endif()
         endif()
     endif()
 
