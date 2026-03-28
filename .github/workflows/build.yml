@@ -1,251 +1,393 @@
-name: CI
+name: Build Stable Diffusion SDK
 
 on:
-  # Allows manual triggering
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create new release'
-        required: true
+        description: "Create a GitHub Release for this run"
+        required: false
+        default: false
         type: boolean
-  push: {}
-  pull_request:
-    types: [opened, synchronize, edited, reopened, review_requested, ready_for_review]
 
-env:
- BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
 
 jobs:
-
-  ubuntu-latest-cmake:
-    runs-on: ubuntu-latest
-
-    continue-on-error: true
-
+  build-linux-x86_64:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Clone
-        id: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Dependencies
-        id: depends
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install build-essential zip
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential cmake ninja-build
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build/linux -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/install/linux" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DGGML_NATIVE=OFF \
+            -DSD_USE_SYSTEM_GGML=ON \
+            -DSD_BUILD_EXAMPLES=OFF
 
       - name: Build
-        id: cmake_build
+        run: cmake --build build/linux --config Release -j "$(nproc)"
+
+      - name: Install
+        run: cmake --install build/linux --config Release
+
+      - name: Stage stable-diffusion SDK
+        shell: bash
         run: |
-          mkdir build
-          cd build
-          cmake ..
-          cmake --build . --config Release
+          set -euo pipefail
 
-      - name: Get commit hash
-        id: commit
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: pr-mpt/actions-commit-hash@v2
+          build_root="build/linux"
+          install_root="install/linux"
+          stage="artifact/stable-diffusion-linux-x86_64-sdk"
+          archive="artifact/stable-diffusion-sdk-linux-x86_64.tar.gz"
+          config_file="$stage/lib/cmake/sd/sd-config.cmake"
+          pkgconfig_file="$stage/lib/pkgconfig/sd.pc"
 
-      - name: Fetch system info
-        id: system-info
-        run: |
-          echo "CPU_ARCH=`uname -m`" >> "$GITHUB_OUTPUT"
-          echo "OS_NAME=`lsb_release -s -i`" >> "$GITHUB_OUTPUT"
-          echo "OS_VERSION=`lsb_release -s -r`" >> "$GITHUB_OUTPUT"
-          echo "OS_TYPE=`uname -s`" >> "$GITHUB_OUTPUT"
+          rm -rf "$stage" "$archive"
+          mkdir -p artifact
+          cp -a "$install_root" "$stage"
 
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          zip -j stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip ./build/bin/libsd-abi.so
+          perl -0pi -e 's/find_package\(ggml REQUIRED HINTS \$\{SD_LIB_DIR\}\/cmake\)/find_package(ggml CONFIG REQUIRED)/g' "$config_file"
 
-      - name: Upload artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v3
+          ggml_release_base_url="$(grep '^GGML_RELEASE_BASE_URL:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          ggml_release_tag="$(grep '^GGML_RELEASE_TAG:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          stable_diffusion_upstream_tag="$(grep '^STABLE_DIFFUSION_UPSTREAM_TAG:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          ggml_release_page="${ggml_release_base_url/\/releases\/download/\/releases\/tag}/${ggml_release_tag}"
+
+          upstream_license="$(find "$build_root/_deps" -type f -name LICENSE 2>/dev/null | grep -E 'stable[-_]diffusion' | head -n1 || true)"
+
+          cat > "$stage/SDK-METADATA.txt" <<EOF
+          name=stable-diffusion
+          cmake_package_name=sd
+          platform=linux-x86_64
+          stable_diffusion_upstream_tag=${stable_diffusion_upstream_tag}
+          ggml_release_base_url=${ggml_release_base_url}
+          ggml_release_tag=${ggml_release_tag}
+          consume_note=Install the matching ggml SDK separately and expose both roots via CMAKE_PREFIX_PATH or set ggml_DIR explicitly.
+          EOF
+
+          cat > "$stage/README.sdk.txt" <<EOF
+          This SDK contains the prebuilt stable-diffusion shared library,
+          public header, and CMake/pkg-config metadata.
+
+          Download the matching ggml SDK separately from:
+          ${ggml_release_page}
+
+          To consume both SDKs from CMake, add both roots to CMAKE_PREFIX_PATH
+          or set ggml_DIR explicitly before resolving stable-diffusion.
+          The exported CMake package is named sd (sd-config.cmake).
+          EOF
+
+          cp LICENSE "$stage/LICENSE.project"
+          if [ -n "$upstream_license" ]; then
+            cp "$upstream_license" "$stage/LICENSE.stable-diffusion.cpp"
+          fi
+
+          test -f "$stage/include/stable-diffusion.h"
+          test -f "$config_file"
+          test -f "$pkgconfig_file"
+          grep -q 'find_package(ggml CONFIG REQUIRED)' "$config_file"
+          grep -q -- '-lstable-diffusion' "$pkgconfig_file"
+          ls "$stage/lib"/libstable-diffusion* >/dev/null 2>&1
+
+          tar czf "$archive" -C artifact stable-diffusion-linux-x86_64-sdk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
+          name: stable-diffusion-sdk-linux-x86_64
+          path: artifact/stable-diffusion-sdk-linux-x86_64.tar.gz
+          if-no-files-found: error
 
-  macOS-latest-cmake:
-    runs-on: macOS-latest
-
-    continue-on-error: true
-
+  build-macos-arm64:
+    runs-on: macos-14
     steps:
-      - name: Clone
-        id: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Dependencies
-        id: depends
+      - name: Install dependencies
+        run: brew install cmake ninja
+
+      - name: Configure CMake
         run: |
-          brew install zip
+          cmake -S . -B build/macos -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+            -DCMAKE_INSTALL_RPATH="@loader_path" \
+            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/install/macos" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DGGML_NATIVE=OFF \
+            -DSD_USE_SYSTEM_GGML=ON \
+            -DSD_BUILD_EXAMPLES=OFF
 
       - name: Build
-        id: cmake_build
-        # FMA disabled because it gives "Illegal instruction" in GitHub Actions runner
+        run: cmake --build build/macos --config Release -j "$(sysctl -n hw.ncpu)"
+
+      - name: Install
+        run: cmake --install build/macos --config Release
+
+      - name: Stage stable-diffusion SDK
+        shell: bash
         run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-          cmake --build . --config Release
+          set -euo pipefail
 
-      - name: Get commit hash
-        id: commit
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: pr-mpt/actions-commit-hash@v2
+          build_root="build/macos"
+          install_root="install/macos"
+          stage="artifact/stable-diffusion-macos-arm64-sdk"
+          archive="artifact/stable-diffusion-sdk-macos-arm64.tar.gz"
+          config_file="$stage/lib/cmake/sd/sd-config.cmake"
+          pkgconfig_file="$stage/lib/pkgconfig/sd.pc"
 
-      - name: Fetch system info
-        id: system-info
-        run: |
-          echo "CPU_ARCH=`uname -m`" >> "$GITHUB_OUTPUT"
-          echo "OS_NAME=`sw_vers -productName`" >> "$GITHUB_OUTPUT"
-          echo "OS_VERSION=`sw_vers -productVersion`" >> "$GITHUB_OUTPUT"
-          echo "OS_TYPE=`uname -s`" >> "$GITHUB_OUTPUT"
+          rm -rf "$stage" "$archive"
+          mkdir -p artifact
+          cp -a "$install_root" "$stage"
 
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          zip -j stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip ./build/bin/libsd-abi.dylib
+          perl -0pi -e 's/find_package\(ggml REQUIRED HINTS \$\{SD_LIB_DIR\}\/cmake\)/find_package(ggml CONFIG REQUIRED)/g' "$config_file"
 
-      - name: Upload artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v3
+          ggml_release_base_url="$(grep '^GGML_RELEASE_BASE_URL:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          ggml_release_tag="$(grep '^GGML_RELEASE_TAG:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          stable_diffusion_upstream_tag="$(grep '^STABLE_DIFFUSION_UPSTREAM_TAG:STRING=' "$build_root/CMakeCache.txt" | cut -d= -f2-)"
+          ggml_release_page="${ggml_release_base_url/\/releases\/download/\/releases\/tag}/${ggml_release_tag}"
+
+          upstream_license="$(find "$build_root/_deps" -type f -name LICENSE 2>/dev/null | grep -E 'stable[-_]diffusion' | head -n1 || true)"
+
+          cat > "$stage/SDK-METADATA.txt" <<EOF
+          name=stable-diffusion
+          cmake_package_name=sd
+          platform=macos-arm64
+          stable_diffusion_upstream_tag=${stable_diffusion_upstream_tag}
+          ggml_release_base_url=${ggml_release_base_url}
+          ggml_release_tag=${ggml_release_tag}
+          consume_note=Install the matching ggml SDK separately and expose both roots via CMAKE_PREFIX_PATH or set ggml_DIR explicitly.
+          EOF
+
+          cat > "$stage/README.sdk.txt" <<EOF
+          This SDK contains the prebuilt stable-diffusion shared library,
+          public header, and CMake/pkg-config metadata.
+
+          Download the matching ggml SDK separately from:
+          ${ggml_release_page}
+
+          To consume both SDKs from CMake, add both roots to CMAKE_PREFIX_PATH
+          or set ggml_DIR explicitly before resolving stable-diffusion.
+          The exported CMake package is named sd (sd-config.cmake).
+          EOF
+
+          cp LICENSE "$stage/LICENSE.project"
+          if [ -n "$upstream_license" ]; then
+            cp "$upstream_license" "$stage/LICENSE.stable-diffusion.cpp"
+          fi
+
+          test -f "$stage/include/stable-diffusion.h"
+          test -f "$config_file"
+          test -f "$pkgconfig_file"
+          grep -q 'find_package(ggml CONFIG REQUIRED)' "$config_file"
+          grep -q -- '-lstable-diffusion' "$pkgconfig_file"
+          ls "$stage/lib"/libstable-diffusion* >/dev/null 2>&1
+
+          tar czf "$archive" -C artifact stable-diffusion-macos-arm64-sdk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-${{ steps.system-info.outputs.OS_TYPE }}-${{ steps.system-info.outputs.OS_NAME }}-${{ steps.system-info.outputs.OS_VERSION }}-${{ steps.system-info.outputs.CPU_ARCH }}.zip
+          name: stable-diffusion-sdk-macos-arm64
+          path: artifact/stable-diffusion-sdk-macos-arm64.tar.gz
+          if-no-files-found: error
 
-  windows-latest-cmake:
-    runs-on: windows-latest
-
-    continue-on-error: true
-
-    strategy:
-      matrix:
-        include:
-         - build: 'avx2'
-           defines: ''
-         - build: 'avx'
-           defines: '-DSD_AVX2=OFF'
-         - build: 'avx512'
-           defines: '-DSD_AVX512=ON'
-         - build: 'cuda12'
-           defines: '-DSD_CUBLAS=ON'
-
+  build-windows-x86_64:
+    runs-on: windows-2025
     steps:
-      - name: Clone
-        id: checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install cuda-toolkit
-        id: cuda_toolkit
-        if: ${{ matrix.build == 'cuda12' }}
-        uses: Jimver/cuda-toolkit@v0.2.11
-        with:
-          cuda: '12.2.0'
-          method: 'local'
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Peek cuda-toolkit info
-        id: peek_cuda_toolkit
-        if: ${{ matrix.build == 'cuda12' }}
+      - name: Configure CMake
+        shell: pwsh
         run: |
-          echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
-          echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
-          nvcc -V
+          cmake -S . -B build/windows -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_INSTALL_PREFIX="${env:GITHUB_WORKSPACE}\install\windows" `
+            -DBUILD_SHARED_LIBS=ON `
+            -DGGML_NATIVE=OFF `
+            -DSD_USE_SYSTEM_GGML=ON `
+            -DSD_BUILD_EXAMPLES=OFF
 
       - name: Build
-        id: cmake_build
+        shell: pwsh
+        run: cmake --build build/windows --config Release -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Install
+        shell: pwsh
+        run: cmake --install build/windows --config Release
+
+      - name: Stage stable-diffusion SDK
+        shell: pwsh
         run: |
-          mkdir build
-          cd build
-          cmake .. ${{ matrix.defines }}
-          cmake --build . --config Release
+          $buildRoot = "build/windows"
+          $installRoot = "install/windows"
+          $stage = "artifact/stable-diffusion-windows-x86_64-sdk"
+          $archive = "artifact/stable-diffusion-sdk-windows-x86_64.zip"
 
-      - name: Check AVX512F support
-        id: check_avx512f
-        if: ${{ matrix.build == 'avx512' }}
-        continue-on-error: true
-        run: |
-          cd build
-          $vcdir = $(vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath)
-          $msvc = $(join-path $vcdir $('VC\Tools\MSVC\'+$(gc -raw $(join-path $vcdir 'VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt')).Trim()))
-          $cl =  $(join-path $msvc 'bin\Hostx64\x64\cl.exe')
-          echo 'int main(void){unsigned int a[4];__cpuid(a,7);return !(a[1]&65536);}' >> avx512f.c
-          & $cl /O2 /GS- /kernel avx512f.c /link /nodefaultlib /entry:main
-          .\avx512f.exe && echo "AVX512F: YES" && ( echo HAS_AVX512F=1 >> $env:GITHUB_ENV ) || echo "AVX512F: NO"
+          if (Test-Path $stage) {
+            Remove-Item -LiteralPath $stage -Recurse -Force
+          }
+          if (Test-Path $archive) {
+            Remove-Item -LiteralPath $archive -Force
+          }
 
-      - name: Get commit hash
-        id: commit
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: pr-mpt/actions-commit-hash@v2
+          New-Item -ItemType Directory -Force -Path "artifact" | Out-Null
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item -Path (Join-Path $installRoot '*') -Destination $stage -Recurse -Force
 
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          Rename-Item -Path .\build\bin\Release\sd-abi.dll -NewName sd-abi_${{ matrix.build }}.dll
-          7z a stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-win-${{ matrix.build }}-x64.zip .\build\bin\Release\sd-abi_${{ matrix.build }}.dll
+          $configFile = Join-Path $stage "lib/cmake/sd/sd-config.cmake"
+          $pkgconfigFile = Join-Path $stage "lib/pkgconfig/sd.pc"
+          $configContent = Get-Content -Path $configFile -Raw
+          $configContent = $configContent.Replace(
+            'find_package(ggml REQUIRED HINTS ${SD_LIB_DIR}/cmake)',
+            'find_package(ggml CONFIG REQUIRED)'
+          )
+          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+          [System.IO.File]::WriteAllText((Resolve-Path $configFile), $configContent, $utf8NoBom)
 
-      - name: Upload artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        uses: actions/upload-artifact@v3
+          function Get-CacheValue([string]$Key) {
+            $match = Select-String -Path "$buildRoot/CMakeCache.txt" -Pattern "^${Key}:.*=(.*)$"
+            if (-not $match) {
+              return ""
+            }
+            return $match.Matches[0].Groups[1].Value
+          }
+
+          $ggmlReleaseBaseUrl = Get-CacheValue "GGML_RELEASE_BASE_URL"
+          $ggmlReleaseTag = Get-CacheValue "GGML_RELEASE_TAG"
+          $stableDiffusionUpstreamTag = Get-CacheValue "STABLE_DIFFUSION_UPSTREAM_TAG"
+          $ggmlReleasePage = ($ggmlReleaseBaseUrl -replace '/releases/download$', '/releases/tag') + "/$ggmlReleaseTag"
+
+          $upstreamLicense = Get-ChildItem -Path "$buildRoot/_deps" -Filter LICENSE -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match 'stable[-_]diffusion' } |
+            Select-Object -First 1
+
+          $metadata = @(
+            "name=stable-diffusion",
+            "cmake_package_name=sd",
+            "platform=windows-x86_64",
+            "stable_diffusion_upstream_tag=$stableDiffusionUpstreamTag",
+            "ggml_release_base_url=$ggmlReleaseBaseUrl",
+            "ggml_release_tag=$ggmlReleaseTag",
+            "consume_note=Install the matching ggml SDK separately and expose both roots via CMAKE_PREFIX_PATH or set ggml_DIR explicitly."
+          ) -join "`n"
+          [System.IO.File]::WriteAllText((Join-Path (Resolve-Path $stage) "SDK-METADATA.txt"), $metadata, $utf8NoBom)
+
+          $readme = @(
+            "This SDK contains the prebuilt stable-diffusion shared library,",
+            "public header, and CMake/pkg-config metadata.",
+            "",
+            "Download the matching ggml SDK separately from:",
+            $ggmlReleasePage,
+            "",
+            "To consume both SDKs from CMake, add both roots to CMAKE_PREFIX_PATH",
+            "or set ggml_DIR explicitly before resolving stable-diffusion.",
+            "The exported CMake package is named sd (sd-config.cmake)."
+          ) -join "`n"
+          [System.IO.File]::WriteAllText((Join-Path (Resolve-Path $stage) "README.sdk.txt"), $readme, $utf8NoBom)
+
+          Copy-Item -Path LICENSE -Destination "$stage/LICENSE.project" -Force
+          if ($upstreamLicense) {
+            Copy-Item -Path $upstreamLicense.FullName -Destination "$stage/LICENSE.stable-diffusion.cpp" -Force
+          }
+
+          if (-not (Test-Path "$stage/include/stable-diffusion.h")) {
+            Write-Error "Missing public header stable-diffusion.h"
+            exit 1
+          }
+          if (-not (Test-Path $configFile)) {
+            Write-Error "Missing sd-config.cmake"
+            exit 1
+          }
+          if (-not (Test-Path $pkgconfigFile)) {
+            Write-Error "Missing sd.pc"
+            exit 1
+          }
+          if (-not (Select-String -Path $configFile -Pattern 'find_package\(ggml CONFIG REQUIRED\)' -Quiet)) {
+            Write-Error "sd-config.cmake was not patched to use ggml CONFIG REQUIRED"
+            exit 1
+          }
+          if (-not (Select-String -Path $pkgconfigFile -Pattern '-lstable-diffusion' -Quiet)) {
+            Write-Error "sd.pc does not reference -lstable-diffusion"
+            exit 1
+          }
+          if (-not (Test-Path "$stage/lib/stable-diffusion.lib")) {
+            Write-Error "Missing import library stable-diffusion.lib"
+            exit 1
+          }
+          if (-not (Test-Path "$stage/bin/stable-diffusion.dll")) {
+            Write-Error "Missing runtime library stable-diffusion.dll"
+            exit 1
+          }
+
+          Push-Location artifact
+          Compress-Archive -Path "stable-diffusion-windows-x86_64-sdk" -DestinationPath "stable-diffusion-sdk-windows-x86_64.zip" -Force
+          Pop-Location
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            stable-diffusion-${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}-bin-win-${{ matrix.build }}-x64.zip
+          name: stable-diffusion-sdk-windows-x86_64
+          path: artifact/stable-diffusion-sdk-windows-x86_64.zip
+          if-no-files-found: error
 
   release:
-    if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-
-    runs-on: ubuntu-latest
-
     needs:
-      - ubuntu-latest-cmake
-      - macOS-latest-cmake
-      - windows-latest-cmake
-
+      - build-linux-x86_64
+      - build-macos-arm64
+      - build-windows-x86_64
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.create_release == true) }}
     steps:
-      - name: Download artifacts
-        id: download-artifact
-        uses: actions/download-artifact@v4.1.7
+      - name: Determine release name
+        id: release_name
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=build-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Get commit hash
-        id: commit
-        uses: pr-mpt/actions-commit-hash@v2
+      - name: Download packaged SDK archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stable-diffusion-sdk-*
+          path: release/
+          merge-multiple: true
 
-      - name: Create release
-        id: create_release
-        uses: anzz1/action-create-release@v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_name.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release_name.outputs.name }}
+          files: release/*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.BRANCH_NAME }}-${{ steps.commit.outputs.short }}
-
-      - name: Upload release
-        id: upload_release
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const path = require('path');
-            const fs = require('fs');
-            const release_id = '${{ steps.create_release.outputs.id }}';
-            for (let file of await fs.readdirSync('./artifact')) {
-              if (path.extname(file) === '.zip') {
-                console.log('uploadReleaseAsset', file);
-                await github.repos.uploadReleaseAsset({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  release_id: release_id,
-                  name: file,
-                  data: await fs.readFileSync(`./artifact/${file}`)
-                });
-              }
-            }

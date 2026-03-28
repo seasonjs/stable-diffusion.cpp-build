@@ -1,76 +1,74 @@
 cmake_minimum_required(VERSION 3.12)
-project("stable-diffusion-build")
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+project("stable-diffusion.cpp-build")
 
+include(FetchContent)
+include(./cmake/fetch_prebuilt_ggml.cmake)
 
-if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif ()
-
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED true)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
-
-# Instruction set specific
-option(SD_AVX "sd: enable AVX" ON)
-option(SD_AVX2 "sd: enable AVX2" ON)
-option(SD_AVX512 "sd: enable AVX512" OFF)
-option(SD_FMA "sd: enable FMA" ON)
-option(SD_CUBLAS "sd: cuda backend" OFF)
-
-if (SD_AVX512)
-    set(GGML_AVX512 ON)
-elseif (SD_AVX2)
-    set(GGML_AVX2 ON)
-elseif (SD_AVX)
-    set(GGML_AVX ON)
-endif ()
-if (SD_FMA)
-    set(GGML_FMA ON)
-endif ()
-
-if(SD_CUBLAS)
-	message("Use CUBLAS as backend stable-diffusion")
-    set(GGML_CUBLAS ON)
-    add_definitions(-DSD_USE_CUBLAS)
-endif()
-
-include(sd)
-include_directories(${sd_SOURCE_DIR})
-
-set(SD_ABI sd-abi)
-
-add_library(${SD_ABI} SHARED
-        stable-diffusion-abi.cpp
-        stable-diffusion-abi.h
-        ${sd_SOURCE_DIR}/stable-diffusion.h
-        ${sd_SOURCE_DIR}/stable-diffusion.cpp
-        ${sd_SOURCE_DIR}/util.cpp
-        ${sd_SOURCE_DIR}/upscaler.cpp
+set(
+    SD_SOURCE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/build/_deps/stable-diffusion-src"
+    CACHE PATH
+    "Optional local stable-diffusion source tree. When present it is preferred over downloading stable-diffusion."
 )
 
-target_include_directories(${SD_ABI} PUBLIC .)
-target_include_directories(${SD_ABI} PUBLIC ${sd_SOURCE_DIR} .)
+set(GGML_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/ggml" CACHE PATH "Path to an unpacked ggml SDK")
+set(GGML_RELEASE_BASE_URL "https://github.com/seasonjs/ggml.cpp-build/releases/download" CACHE STRING "Base release URL, for example https://github.com/seasonjs/ggml.cpp-build/releases/download")
+set(GGML_RELEASE_TAG "v0.9.8" CACHE STRING "Release tag containing the prebuilt ggml SDK archives")
 
-set_target_properties(zip PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(stable-diffusion PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_compile_definitions(${SD_ABI} PUBLIC SD_BUILD_SHARED_LIB)
-target_compile_definitions(${SD_ABI} PRIVATE SD_BUILD_DLL)
-set_target_properties(${SD_ABI} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_compile_definitions(${SD_ABI} PUBLIC STABLE_DIFFUSION_SHARED STABLE_DIFFUSION_BUILD)
-target_compile_definitions(${SD_ABI} PRIVATE STABLE_DIFFUSION_BUILD)
-target_link_libraries(${SD_ABI} PUBLIC stable-diffusion)
+# add dependencies
+get_filename_component(_sd_local_source_dir "${SD_SOURCE_DIR}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Ensure non-empty build number for stable-diffusion.cpp versioning
+
+set(STABLE_DIFFUSION_UPSTREAM_TAG "b0527541" CACHE STRING "Default stable-diffusion build number" FORCE)
+
+
+# Strategy: ggml dynamic + stable-diffusion static
+# Note: We'll use BUILD_SHARED_LIBS=ON to build both as shared initially,
+# but stable-diffusion.cpp's CMake allows us to use ggml as dynamic
+
+# Important: Build shared libraries initially (ggml + stable-diffusion)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libs" FORCE)
+set(STABLE_DIFFUSION_USE_SYSTEM_GGML ON CACHE BOOL "Use system ggml" FORCE)
+
+message("check STABLE_DIFFUSION_UPSTREAM_TAG ${STABLE_DIFFUSION_UPSTREAM_TAG}")
+
+add_compile_definitions(GGML_MAX_NAME=128)
+
+if (EXISTS "${GGML_ROOT_DIR}")
+    ggml_import_prebuilt(
+        ROOT_DIR "${GGML_ROOT_DIR}"
+        OUT_ROOT_DIR GGML_PACKAGE_ROOT
+    )
+elseif (GGML_RELEASE_BASE_URL)
+    ggml_import_prebuilt(
+        RELEASE_BASE_URL "${GGML_RELEASE_BASE_URL}"
+        RELEASE_TAG "${GGML_RELEASE_TAG}"
+        OUT_ROOT_DIR GGML_PACKAGE_ROOT
+    )
+else()
+    message(FATAL_ERROR
+        "Set GGML_ROOT_DIR to an unpacked ggml SDK or provide GGML_RELEASE_BASE_URL so CMake can download one.")
+endif()
+
+if (EXISTS "${_sd_local_source_dir}/CMakeLists.txt")
+    message(STATUS "Using local stable-diffusion source tree: ${_sd_local_source_dir}")
+    add_subdirectory("${_sd_local_source_dir}" "${CMAKE_BINARY_DIR}/stable-diffusion")
+else()
+    message(STATUS "Fetching stable-diffusion.cpp ${STABLE_DIFFUSION_UPSTREAM_TAG} from GitHub")
+    FetchContent_Declare(
+        stable_diffusion
+        GIT_REPOSITORY https://github.com/Cyberhan123/stable-diffusion.cpp.git
+        GIT_TAG        ${STABLE_DIFFUSION_UPSTREAM_TAG}
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(stable_diffusion)
+endif()
+
+# We don't need to copy ggml's runtime binaries to the output directory
+# ggml_copy_runtime_binaries(main_app
+#     ROOT_DIR "${GGML_PACKAGE_ROOT}"
+# )
