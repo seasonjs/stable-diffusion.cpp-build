@@ -348,33 +348,6 @@ jobs:
             exit 1
           }
 
-          # Copy PDB files for debugging.
-          # On Windows, many projects generate PDB in build tree (not install tree), so scan both.
-          $pdbCandidates = @()
-          if (Test-Path $installRoot) {
-            $pdbCandidates += Get-ChildItem -Path $installRoot -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
-          }
-          if (Test-Path $buildRoot) {
-            $pdbCandidates += Get-ChildItem -Path $buildRoot -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
-          }
-
-          $pdbFiles = $pdbCandidates |
-            Sort-Object -Property FullName -Unique |
-            Where-Object {
-              $_.FullName -match '\\(Release|RelWithDebInfo)\\' -or
-              $_.Name -match 'stable-diffusion|main_app|ggml'
-            }
-
-          if ($pdbFiles.Count -gt 0) {
-            New-Item -ItemType Directory -Force -Path "$stage/bin" | Out-Null
-            foreach ($pdbFile in $pdbFiles) {
-              Copy-Item -Path $pdbFile.FullName -Destination "$stage/bin/$($pdbFile.Name)" -Force
-            }
-            Write-Host "Copied $($pdbFiles.Count) PDB file(s) to SDK from build/install trees"
-          } else {
-            Write-Host "Warning: No PDB files found in install or build tree"
-          }
-
           Push-Location artifact
           Compress-Archive -Path "stable-diffusion-windows-x86_64-sdk" -DestinationPath "stable-diffusion-sdk-windows-x86_64.zip" -Force
           Pop-Location
@@ -384,6 +357,53 @@ jobs:
         with:
           name: stable-diffusion-sdk-windows-x86_64
           path: artifact/stable-diffusion-sdk-windows-x86_64.zip
+          if-no-files-found: error
+
+      - name: Stage PDB symbols
+        shell: pwsh
+        run: |
+          $buildRoot  = "build/windows"
+          $installRoot = "install/windows"
+          $pdbStage   = "artifact/stable-diffusion-windows-x86_64-pdb"
+          $pdbArchive = "artifact/stable-diffusion-sdk-windows-x86_64-pdb.zip"
+
+          if (Test-Path $pdbStage) { Remove-Item -LiteralPath $pdbStage -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path $pdbStage | Out-Null
+
+          $pdbCandidates = @()
+          if (Test-Path $installRoot) {
+            $pdbCandidates += Get-ChildItem -Path $installRoot -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
+          }
+          if (Test-Path $buildRoot) {
+            $pdbCandidates += Get-ChildItem -Path $buildRoot  -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
+          }
+
+          $pdbFiles = $pdbCandidates |
+            Sort-Object -Property FullName -Unique |
+            Where-Object {
+              $_.FullName -match '\\(Release|RelWithDebInfo)\\' -or
+              $_.Name     -match 'stable-diffusion|ggml'
+            }
+
+          if ($pdbFiles.Count -eq 0) {
+            Write-Error "No PDB files found in install or build tree. Check that /Zi and /DEBUG flags are active."
+            exit 1
+          }
+
+          foreach ($pdbFile in $pdbFiles) {
+            Copy-Item -Path $pdbFile.FullName -Destination "$pdbStage/$($pdbFile.Name)" -Force
+          }
+          Write-Host "Staged $($pdbFiles.Count) PDB file(s)"
+
+          Push-Location artifact
+          Compress-Archive -Path "stable-diffusion-windows-x86_64-pdb" -DestinationPath "stable-diffusion-sdk-windows-x86_64-pdb.zip" -Force
+          Pop-Location
+
+      - name: Upload PDB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stable-diffusion-sdk-windows-x86_64-pdb
+          path: artifact/stable-diffusion-sdk-windows-x86_64-pdb.zip
           if-no-files-found: error
 
   release:
