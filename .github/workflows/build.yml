@@ -231,7 +231,10 @@ jobs:
             -DBUILD_SHARED_LIBS=ON `
             -DGGML_NATIVE=OFF `
             -DSD_USE_SYSTEM_GGML=ON `
-            -DSD_BUILD_EXAMPLES=OFF
+            -DSD_BUILD_EXAMPLES=OFF `
+            -DCMAKE_CXX_FLAGS_RELEASE="/O2 /Zi" `
+            -DCMAKE_EXE_LINKER_FLAGS_RELEASE="/DEBUG" `
+            -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="/DEBUG"
 
       - name: Build
         shell: pwsh
@@ -343,6 +346,18 @@ jobs:
           if (-not (Test-Path "$stage/bin/stable-diffusion.dll")) {
             Write-Error "Missing runtime library stable-diffusion.dll"
             exit 1
+          }
+
+          # Copy PDB files for debugging
+          $pdbFiles = Get-ChildItem -Path "$installRoot" -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
+          if ($pdbFiles) {
+            New-Item -ItemType Directory -Force -Path "$stage/bin" | Out-Null
+            foreach ($pdbFile in $pdbFiles) {
+              Copy-Item -Path $pdbFile.FullName -Destination "$stage/bin/$($pdbFile.Name)" -Force
+            }
+            Write-Host "Copied $($pdbFiles.Count) PDB file(s) to SDK"
+          } else {
+            Write-Host "Warning: No PDB files found"
           }
 
           Push-Location artifact
