@@ -348,16 +348,31 @@ jobs:
             exit 1
           }
 
-          # Copy PDB files for debugging
-          $pdbFiles = Get-ChildItem -Path "$installRoot" -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
-          if ($pdbFiles) {
+          # Copy PDB files for debugging.
+          # On Windows, many projects generate PDB in build tree (not install tree), so scan both.
+          $pdbCandidates = @()
+          if (Test-Path $installRoot) {
+            $pdbCandidates += Get-ChildItem -Path $installRoot -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
+          }
+          if (Test-Path $buildRoot) {
+            $pdbCandidates += Get-ChildItem -Path $buildRoot -Filter "*.pdb" -Recurse -ErrorAction SilentlyContinue
+          }
+
+          $pdbFiles = $pdbCandidates |
+            Sort-Object -Property FullName -Unique |
+            Where-Object {
+              $_.FullName -match '\\(Release|RelWithDebInfo)\\' -or
+              $_.Name -match 'stable-diffusion|main_app|ggml'
+            }
+
+          if ($pdbFiles.Count -gt 0) {
             New-Item -ItemType Directory -Force -Path "$stage/bin" | Out-Null
             foreach ($pdbFile in $pdbFiles) {
               Copy-Item -Path $pdbFile.FullName -Destination "$stage/bin/$($pdbFile.Name)" -Force
             }
-            Write-Host "Copied $($pdbFiles.Count) PDB file(s) to SDK"
+            Write-Host "Copied $($pdbFiles.Count) PDB file(s) to SDK from build/install trees"
           } else {
-            Write-Host "Warning: No PDB files found"
+            Write-Host "Warning: No PDB files found in install or build tree"
           }
 
           Push-Location artifact
