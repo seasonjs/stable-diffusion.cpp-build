@@ -232,9 +232,9 @@ jobs:
             -DGGML_NATIVE=OFF `
             -DSD_USE_SYSTEM_GGML=ON `
             -DSD_BUILD_EXAMPLES=OFF `
-            -DCMAKE_CXX_FLAGS_RELEASE="/O2 /Zi" `
-            -DCMAKE_EXE_LINKER_FLAGS_RELEASE="/DEBUG" `
-            -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="/DEBUG"
+            -DCMAKE_CXX_FLAGS="/Zi" `
+            -DCMAKE_EXE_LINKER_FLAGS="/DEBUG" `
+            -DCMAKE_SHARED_LINKER_FLAGS="/DEBUG"
 
       - name: Build
         shell: pwsh
