@@ -23,7 +23,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Ensure non-empty build number for stable-diffusion.cpp versioning
 
-set(STABLE_DIFFUSION_UPSTREAM_TAG "b6d6dfbf" CACHE STRING "Default stable-diffusion build number" FORCE)
+set(STABLE_DIFFUSION_UPSTREAM_TAG "b20910d6" CACHE STRING "Default stable-diffusion build number" FORCE)
 
 
 # Strategy: ggml dynamic + stable-diffusion static
